@@ -1,5 +1,6 @@
 import { clerkClient } from "@clerk/express";
 
+// it checks if userId value is present in request or not
 export const protectRoute = async (req, res, next) => {
 	if (!req.auth.userId) {
 		return res.status(401).json({ message: "Unauthorized - you must be logged in" });
@@ -7,6 +8,8 @@ export const protectRoute = async (req, res, next) => {
 	next();
 };
 
+// checks if the logged-in-with email id is equal to admin email id set in .env
+// This function would be used in an api authentication that requires admin to perform task
 export const requireAdmin = async (req, res, next) => {
 	try {
 		const currentUser = await clerkClient.users.getUser(req.auth.userId);
