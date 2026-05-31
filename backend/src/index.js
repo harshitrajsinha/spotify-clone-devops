@@ -35,7 +35,7 @@ app.use(
 );
 
 app.use(express.json()); // to parse req.body
-// app.use(clerkMiddleware()); // this will add auth to req obj => req.auth
+// app.use(clerkMiddleware()); // this will add auth to req obj => req.auth => this middleware adds auth object which contains multiple fields, especially userId, inside every request object it is attached to.
 app.use(
 	fileUpload({
 		useTempFiles: true,
