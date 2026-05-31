@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
-		clerkId: {
+		clerkId: {				// clerkId is the id passed by google auth in the registered callback function
 			type: String,
 			required: true,
 			unique: true,
