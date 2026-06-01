@@ -11,7 +11,7 @@ interface AuthStore {
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
-	isAdmin: false,
+	isAdmin: true,
 	isLoading: false,
 	error: null,
 
