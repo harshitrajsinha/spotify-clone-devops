@@ -3,10 +3,12 @@ import { axiosInstance } from "@/lib/axios";
 import { Loader } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
   const callbackAttempted = useRef(false);
+  const { checkAdminStatus } = useAuthStore();
 
   useEffect(() => {
     const processCallback = async () => {
@@ -28,6 +30,15 @@ const AuthCallbackPage = () => {
         await axiosInstance.post("/auth/callback", {
           code,
         });
+
+        await axiosInstance.get(
+          "/auth/me",
+          {
+            withCredentials: true,
+          }
+        );
+
+        await checkAdminStatus();
 
         navigate("/");
       } catch (error) {

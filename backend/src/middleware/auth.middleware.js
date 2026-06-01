@@ -55,3 +55,17 @@ export const requireAdmin = async (req, res, next) => {
 		next(error);
 	}
 };
+
+export const getCurrentUser = async (req, res, next) => {
+	try {
+		res.status(200).json({
+			userId: req.user.sub,
+			email: req.user.email,
+			isAdmin:
+				req.user.email ===
+				process.env.ADMIN_EMAIL,
+		});
+	} catch (error) {
+		next(error);
+	}
+};

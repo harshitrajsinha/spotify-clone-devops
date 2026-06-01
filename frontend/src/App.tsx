@@ -6,10 +6,19 @@ import MainLayout from "./layout/MainLayout";
 import AlbumPage from "./pages/album/AlbumPage";
 import AdminPage from "./pages/admin/AdminPage";
 
+import { useEffect } from "react";
+import { useAuthStore } from "@/stores/useAuthStore";
+
 import { Toaster } from "react-hot-toast";
 import NotFoundPage from "./pages/404/NotFoundPage";
 
 function App() {
+
+	const initializeAuth = useAuthStore((state) =>state.initializeAuth);
+	useEffect(() => {
+    	initializeAuth();
+  	}, []);
+
 	return (
 		<>
 			<Routes>

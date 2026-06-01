@@ -8,9 +8,11 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "./ui/button";
 
 const Topbar = () => {
-	const { isAdmin } = useAuthStore();
-	console.log({ isAdmin });
-
+	const { isAdmin, isAuthenticated, isLoading } = useAuthStore();
+	if (isLoading) {
+		return null; // or spinner
+	}
+	console.log("hererer", isLoading, isAuthenticated)
 	return (
 		<div
 			className='flex items-center justify-between p-4 sticky top-0 bg-zinc-900/75 
@@ -30,8 +32,14 @@ const Topbar = () => {
 				)}
 
 				{/* <SignedOut> */}
-					<SignInOAuthButtons />
-					<SignOutButton />
+					{!isLoading && !isAuthenticated && (
+						
+						<SignInOAuthButtons />
+					)}
+
+					{!isLoading && isAuthenticated && (
+						<SignOutButton />
+					)}
 				{/* </SignedOut> */}
 
 				{/* <UserButton /> */}
