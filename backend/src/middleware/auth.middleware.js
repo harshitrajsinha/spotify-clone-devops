@@ -38,11 +38,7 @@ export const protectRoute = async (req, res, next) => {
 	}
 };
 
-export const requireAdmin = async (
-	req,
-	res,
-	next
-) => {
+export const requireAdmin = async (req, res, next) => {
 	try {
 		if (
 			req.user.email !==
