@@ -34,3 +34,6 @@ VITE_BACKEND_URL=
 VITE_COGNITO_DOMAIN=
 VITE_COGNITO_CLIENT_ID=
 ```
+
+## AWS-native architecture
+![Architecture](/assets/spotify-clone-devops-arch.png)
