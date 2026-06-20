@@ -37,3 +37,7 @@ VITE_COGNITO_CLIENT_ID=
 
 ## AWS-native architecture
 ![Architecture](/assets/spotify-clone-devops-arc.png)
+
+## Migration from Clerk to AWS Cognito
+* Integrated Google OAuth in AWS Cognito (same as it was available previously through Clerk), hence there is no change on User facing interface.
+* On code level - majority of the authentication workload, in case of Clerk, that was handled by frontend is now shifted onto backend where frontend verifies the user and shares a code with backend, which then generate authentication cookie and save it on client's browser.
