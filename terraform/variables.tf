@@ -97,9 +97,15 @@ variable "my_domain_name" {
   default     = "harshitrajsinha.fun"
 }
 
+variable "cognito_domain" {
+  description = "Domain name for cognito"
+  type        = string
+  default     = "auth.harshitrajsinha.fun"
+}
+
 variable "is_certificate_issued" {
   description = "Boolean value on whether certificate is successfully issued and configured"
   type        = bool
-  default     = true
+  default     = false
 
 }

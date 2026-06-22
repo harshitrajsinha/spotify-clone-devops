@@ -28,9 +28,13 @@ output "cognito_user_pool_id" {
 resource "aws_cognito_user_pool_domain" "spotify_cognito_user_pool_domain" {
   count = var.is_certificate_issued ? 1 : 0
 
-  domain          = "spotify.harshitrajsinha.fun"
+  domain          = var.cognito_domain
   certificate_arn = aws_acm_certificate.spotify_domain_certificate.arn
   user_pool_id    = aws_cognito_user_pool.spotify_cognito_user_pool.id
+}
+
+output "cognito_domain_cloudfront_distribution"{
+  value = aws_cognito_user_pool_domain.spotify_cognito_user_pool_domain.cloudfront_distribution # To be added to Domain provider as CNAME
 }
 
 # ---------------------------------------------------
@@ -38,14 +42,15 @@ resource "aws_cognito_user_pool_domain" "spotify_cognito_user_pool_domain" {
 resource "aws_cognito_user_pool_client" "spotify_cognito_user_pool_client" {
   name = "spotify-cognito-user-pool-client"
 
+  
   user_pool_id = aws_cognito_user_pool.spotify_cognito_user_pool.id
-
-  callback_urls                        = ["http://localhost:3000/auth-callback"]
-  logout_urls                          = ["http://localhost:3000"]
+  generate_secret = true
+  callback_urls                        = ["https://${var.my_domain_name}/auth-callback", "http://localhost:3000/auth-callback"]
+  logout_urls                          = ["https://${var.my_domain_name}", "http://localhost:3000"]
   allowed_oauth_flows_user_pool_client = true
   allowed_oauth_flows                  = ["code"]
   allowed_oauth_scopes                 = ["email", "openid", "profile"]
-  supported_identity_providers = concat(["COGNITO"], var.google_client_secret != null ? ["Google"] : [])
+  supported_identity_providers         = concat(["COGNITO"], var.google_client_secret != null ? ["Google"] : [])
 }
 
 output "aws_cognito_user_pool_client_id" {
