@@ -1,0 +1,15 @@
+FROM node:24.16.0-alpine3.23
+
+WORKDIR /app
+
+COPY backend/package.json backend/package-lock.json ./
+
+RUN npm ci
+
+COPY ./backend/ .
+
+EXPOSE 8000
+
+USER node
+
+CMD ["node", "src/index.js"]
