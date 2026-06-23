@@ -25,7 +25,7 @@ output "acm_domain_options" {
 resource "aws_lb_target_group" "spotify_appserver_frontend_tg" {
   name        = "spotify-appserver-frontend-tg"
   target_type = "instance"
-  port        = 3000
+  port        = 80          # because even though frontend runs on 3000, frontend docker container will expose it on 80 (nginx)
   protocol    = "HTTP"
   vpc_id      = module.vpc.vpc_id
 
@@ -53,7 +53,7 @@ resource "aws_lb_target_group" "spotify_appserver_frontend_tg" {
 resource "aws_lb_target_group_attachment" "spotify_appserver_frontend_tg_attn" {
   target_group_arn = aws_lb_target_group.spotify_appserver_frontend_tg.arn
   target_id        = aws_instance.spotify_app_server.id
-  port             = 3000
+  port             = 80                                   # same port as of aws_lb_target_group
 }
 
 # Target group for backend
