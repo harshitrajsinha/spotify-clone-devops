@@ -63,6 +63,7 @@ cron.schedule("0 * * * *", () => {
 	}
 });
 
+app.use("/api/health", authRoutes)
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);

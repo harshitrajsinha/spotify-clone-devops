@@ -66,9 +66,9 @@ resource "aws_lb_target_group" "spotify_appserver_backend_tg" {
 
   health_check {
     enabled             = true
-    path                = "/"
+    path                = "/api/health"
     protocol            = "HTTP"
-    matcher             = "200-499"
+    matcher             = "200"
     interval            = 30
     timeout             = 5
     healthy_threshold   = 2
