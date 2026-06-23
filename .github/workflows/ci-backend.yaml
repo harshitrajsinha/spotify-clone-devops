@@ -56,6 +56,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           issue_assignees: harshitrajsinha
           issue_labels: vulnerability,test
+          working_directory: backend
       - name: Display audit report
         run: npm audit --audit-level=high || true
       
