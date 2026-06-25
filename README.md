@@ -104,3 +104,8 @@ cd spotify-clone-devops
 docker build --secret id=spotify-frontend-env,src=.env -t <image-name>:<version> -f docker/Dockerfile.frontend . # assuming .env is located in root directory with name .env
 docker run -p 80:80 <image-name>:<version> # Frontend docker container is exposed on port 80 (as we are using nginx as proxy server)
 ```
+
+Problem with docker compose
+
+1. Could not scale on fixed port. Such as scaling backend would give error - "port is already allocated" by backend 1 on 8000. Sol - Make internal-only port
+2. Internal-only port resolves the allocated port issue by assigning random port on host => frontend and backend are no longer being served on desired ports - 80 and 8000 respectively. Sol - reverse proxy - traefik
