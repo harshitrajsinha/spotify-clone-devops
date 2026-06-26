@@ -1,22 +1,21 @@
 services:
   traefik:
-    image: traefik:v3.7.5
-    container_name: traefik
+    image: traefik:v3.7
+    container_name: "traefik"
     command:
       - "--api.insecure=true"
-      - "--api.dashboard=true"
       - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=proxy"
       - "--entrypoints.web.address=:80"
+    networks:
+      - traefik
     ports:
       - "80:80"
-      # - "8000:8000"
       - "8080:8080" # dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - app-network
     restart: unless-stopped
+
 
 
   backend:
@@ -26,21 +25,27 @@ services:
     image: backend-image:latest
     expose:
       - "8000"
-    # ports:
-    #   - "8000" # Internal-only port to avoid "port already allocated" issue
     env_file:
       - backend/.env
+    restart: unless-stopped
     deploy:
       replicas: 1
     networks:
-      - app-network
-    restart: unless-stopped
+      - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
-      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.rule=Host(`urban-yodel-59q69wvgrpwhvjq-80.app.github.dev`) && PathPrefix(`/api`)"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
 
+
+
+      # - "traefik.enable=true"
+      # - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      # - "traefik.http.routers.frontend.entrypoints=web"
+      # - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      # - "traefik.http.routers.frontend.priority=1"
+      # - "traefik.http.routers.backend.priority=10"
+  
   frontend:
     build:
       context: .
@@ -48,26 +53,20 @@ services:
       secrets:
         - spotify-frontend-env
     image: frontend-image:latest
-    # ports:
-    #   - "80" # Internal-only port to avoid "port already allocated" issue
     expose:
       - "80"
+    networks:
+      - traefik
+    restart: unless-stopped
     deploy:
       replicas: 1
-    networks:
-      - app-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
-      - "traefik.http.routers.frontend.priority=1"
-      - "traefik.http.routers.backend.priority=10"
-    restart: unless-stopped
+      - "traefik.http.routers.frontend.rule=Host(`urban-yodel-59q69wvgrpwhvjq-80.app.github.dev`) && PathPrefix(`/`)"
 
 
 networks:
-  app-network:
+  traefik:
     driver: bridge
 secrets:
   spotify-frontend-env:
