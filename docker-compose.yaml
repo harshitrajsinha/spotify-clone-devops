@@ -3,34 +3,36 @@ services:
     image: traefik:v3.7
     container_name: "traefik"
     command:
-      - "--api.insecure=true"
+      - "--api.insecure=true" # Not securing Traefik dashboard since logs will be genreated separately, default unsecure dashboard will work fine as it may never be accessed.
       - "--providers.docker=true"
-      - "--providers.docker.network=traefik"
-      - "--entrypoints.web.address=:80"
-      - "--providers.docker.exposedbydefault=false" # starting with disabling any container to be exposed to traefik and later explicitly enabling specific container.
-    networks:
-      - traefik
+      - "--providers.docker.network=traefik-net"
+      - "--entrypoints.web.address=:80" # Entrypoint
+      - "--providers.docker.exposedbydefault=false" # Disable any container to get exposed to traefik and later explicitly enable specific container like Frontend and Backend.
+    restart: unless-stopped
     ports:
       - "80:80"
       - "8080:8080" # For traefik dashboard
+    networks:
+      - traefik-net
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock # this will allow all containers to be in expose state to traefik (Not secure but require for service discovery). That's why exposedbydefault=false
-    restart: unless-stopped
-
+      - /var/run/docker.sock:/var/run/docker.sock # Docker sock binding (Not secure but require for service discovery). That's why exposedbydefault=false
+    
   backend:
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
     image: backend-image:latest
+    # Not to specify container_name and ports as they will create conflicts during scale up.
     expose:
       - "8000"
     env_file:
       - backend/.env
     restart: unless-stopped
+    ############################   CPU and memory limit required
     deploy:
-      replicas: 1 # Pre-specify replicas based on capability of t3a.medium because auto-scaling is not possible in docker
+      replicas: 1 # Pre-allocate replicas based on capability of t3a.medium because auto-scaling is not possible in docker
     networks:
-      - traefik
+      - traefik-net
     labels:
       - "traefik.enable=true" # Enabling will allow exposing "this" container to traefik
       - "traefik.http.routers.backend.rule=Host(`localhost`) && PathPrefix(`/api`)"
@@ -47,7 +49,7 @@ services:
     expose:
       - "80"
     networks:
-      - traefik
+      - traefik-net
     restart: unless-stopped
     deploy:
       replicas: 1
@@ -56,10 +58,12 @@ services:
       - "traefik.http.routers.frontend.rule=Host(`localhost`) && PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.priority=1"
+    depends_on:
+      - backend
 
 networks:
-  traefik:
-    driver: bridge
+  traefik-net:
+    name: traefik-net
 secrets:
   spotify-frontend-env:
     file: frontend/.env
