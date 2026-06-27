@@ -28,12 +28,12 @@ services:
       - backend/.env
     restart: unless-stopped
     deploy:
-      replicas: 1
+      replicas: 1 # Pre-specify replicas based on capability of t3a.medium because auto-scaling is not possible in docker
     networks:
       - traefik
     labels:
       - "traefik.enable=true" # Enabling will allow exposing "this" container to traefik
-      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=Host(`localhost`) && PathPrefix(`/api`)"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
       - "traefik.http.routers.backend.priority=10"
   
@@ -53,7 +53,7 @@ services:
       replicas: 1
     labels:
       - "traefik.enable=true" # Enabling will allow exposing "this" container to traefik
-      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.rule=Host(`localhost`) && PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.priority=1"
 
