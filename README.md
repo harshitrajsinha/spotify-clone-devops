@@ -2,8 +2,7 @@ This project is forked from [burakorkmez/realtime-spotify-clone](https://github.
 
 <br>
 
-
-<img src="./frontend/public/screenshot-for-readme.png" alt="Demo App" width="1000" height="200" />
+<img src="/assets/app-sample-run.png" alt="Demo App" width="800" height="400"/>
 <h2 align="center">Realtime Spotify Application ✨</h2><br>
 
 ## 📋 <a name="table">Table of Contents</a>
