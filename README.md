@@ -60,11 +60,29 @@ VITE_MODE=development
 VITE_COGNITO_DOMAIN=
 VITE_COGNITO_CLIENT_ID=
 ```
+* Update frontend/nginx.conf
+```bash
+# Make sure nginx.conf contains backend url as
+#location /api/ {
+#    proxy_pass http://localhost;    <----- Traefik entrypoint
+#    ...
+#}
+```
 
 **Building and Running the Project**
 ```
 docker compose up --build
 ```
+
+**Loading data into database**
+```
+docker exec -it <backend-container-id> sh
+app/ $ npm run seed:songs
+app/ $ npm run seed:albums
+app/ $ exit
+```
+NOTE: Data is loaded into database manually because adding into Dockerfile or Compose poses the risk of writing data into database everytime container runs or restart. This is problem in production, especially with large amount of data
+
 
 ## AWS-native architecture
 ![Architecture](/assets/spotify-clone-devops-arc.png)

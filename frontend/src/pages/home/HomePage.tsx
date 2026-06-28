@@ -24,6 +24,7 @@ const HomePage = () => {
 		fetchFeaturedSongs();
 		fetchMadeForYouSongs();
 		fetchTrendingSongs();
+		fetchHealth();
 	}, [fetchFeaturedSongs, fetchMadeForYouSongs, fetchTrendingSongs, fetchHealth]);
 
 	useEffect(() => {
