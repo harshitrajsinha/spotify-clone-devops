@@ -6,9 +6,11 @@ RUN apk add --no-cache curl
 
 COPY backend/package.json backend/package-lock.json ./
 
-RUN npm ci
+RUN npm ci --omit=dev \
+    && npm cache clean --force
 
-COPY ./backend/ .
+# Copy files from local along with changing its ownership to non-root user
+COPY --chown=node:node ./backend/ .
 
 EXPOSE 8000
 

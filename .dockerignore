@@ -1,0 +1,12 @@
+node_modules/
+.git
+.gitignore
+Dockerfile
+README.md
+.devcontainer/
+static/
+docker/*
+terraform/*
+docker-compose.yaml
+**/.env
+**/.env.*
