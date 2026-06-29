@@ -5,6 +5,27 @@ This project is forked from [burakorkmez/realtime-spotify-clone](https://github.
 <img src="./assets/spotify-arch.png" alt="Demo App" width="800" height="400"/>
 <h2 align="center">Realtime Spotify Application ✨</h2><br>
 
+```
+                              --------------
+                              |  Internet  |
+                              --------------   
+                                    |
+                                 AWS ALB
+                                    |
+                         Target Group (Port 80)
+                                    |
+                               EC2 Instance
+                    -----------------------------------
+                                    |
+                            Traefik (Port 80)
+                          ┌──────────┴──────────┐
+                          │                     │
+                    PathPrefix("/")     PathPrefix("/api")
+                          │                     │
+                       Frontend              Backend
+
+```
+
 ## 📋 <a name="table">Table of Contents</a>
 
 1. [Tech Stack](#tech-stack)
