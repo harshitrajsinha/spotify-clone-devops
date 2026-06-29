@@ -2,7 +2,7 @@ This project is forked from [burakorkmez/realtime-spotify-clone](https://github.
 
 <br>
 
-<img src="./assets/spotify-arch.png" alt="Demo App" width="800" height="400"/>
+<img src="./assets/project-system-architecture.png" alt="Demo App" width="800" height="400"/>
 <h2 align="center">Realtime Spotify Application ✨</h2><br>
 
 ```
@@ -102,6 +102,20 @@ app/ $ npm run seed:albums
 app/ $ exit
 ```
 NOTE: Data is loaded into database manually because adding this script into Dockerfile or Compose poses the risk of writing data into database everytime container restarts. This is problem in production, especially with large amount of data
+
+# <a name="devops">Devopsifying the project</a>
+
+### 🐳 Dockerizing frontend and backend application
+
+Using `node:24.16.0-alpine3.23` image size as the baseline, successfully dockerized the frontend and backend services while keeping the final image sizes to just 22% and 14% above the baseline, respectively.
+
+![docker-image](./assets/spotify-docker-images-v2.png) 
+
+#### Learnings:
+
+1. Secured frontend Docker image build-time environment variables using Build Secrets.<br/><br/>
+2. Slightly improved the build time by combining copying and changing file ownership into single command (this could have significant impact depending on number of application files)
+
 
 
 ## AWS-native architecture
