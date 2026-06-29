@@ -68,7 +68,12 @@ resource "aws_instance" "spotify_app_server" {
     Environment = "${var.project_env_tag}"
   }
 
-  depends_on = [module.vpc]
+   depends_on = [
+     module.vpc,
+     aws_ssm_parameter.cognito_clientid,
+     aws_ssm_parameter.cognito_clientsec,
+     aws_ssm_parameter.cognito_userpoolid,
+   ]
 }
 
 output "app_server_private_ip" {

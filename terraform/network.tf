@@ -8,7 +8,7 @@ module "vpc" {
   private_subnets         = var.private_subnet_cidr # 2 private subnets for application server
   public_subnets          = var.public_subnet_cidr  # 1 public subnet for NAT
   intra_subnets           = var.intra_subnet_cidr   # 3 intra subnets for document DB
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = true                    # For bastion host, if provisioned
 
   enable_nat_gateway = true
   single_nat_gateway = true
@@ -60,22 +60,12 @@ resource "aws_security_group_rule" "sg_rule_alb_ingress_https" {
   security_group_id = aws_security_group.spotify_alb_sg.id
 }
 
-resource "aws_security_group_rule" "sg_rule_alb_egress_3000" {
+resource "aws_security_group_rule" "sg_rule_alb_egress_80" {
   type                     = "egress"
-  from_port                = 3000
-  to_port                  = 3000
+  from_port                = 80
+  to_port                  = 80
   protocol                 = "tcp"
-  description              = "Forward to application on port 3000"
-  source_security_group_id = aws_security_group.spotify_appserver_sg.id
-  security_group_id        = aws_security_group.spotify_alb_sg.id
-}
-
-resource "aws_security_group_rule" "sg_rule_alb_egress_8000" {
-  type                     = "egress"
-  from_port                = 8000
-  to_port                  = 8000
-  protocol                 = "tcp"
-  description              = "Forward to application on port 8000"
+  description              = "Forward request to Traefik reverse proxy on port 80"
   source_security_group_id = aws_security_group.spotify_appserver_sg.id
   security_group_id        = aws_security_group.spotify_alb_sg.id
 }
@@ -84,7 +74,7 @@ resource "aws_security_group_rule" "sg_rule_alb_egress_8000" {
 
 resource "aws_security_group" "spotify_appserver_sg" {
   name        = "spotify-appserver-sg"
-  description = "Allow inbound traffic from alb on 3000 and 8000 and all outbound traffic for updates"
+  description = "Allow inbound traffic from alb on 80 + SSH, and all outbound traffic for updates"
   vpc_id      = module.vpc.vpc_id
 
   tags = {
@@ -94,6 +84,18 @@ resource "aws_security_group" "spotify_appserver_sg" {
   }
 }
 
+# Ingress rule to allow request to Traefik reverse proxy
+resource "aws_security_group_rule" "sg_rule_appserver_ingress_80" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  description              = "Traffic on 80 for Traefik reverse proxy from ALB SG"
+  source_security_group_id = aws_security_group.spotify_alb_sg.id
+  security_group_id        = aws_security_group.spotify_appserver_sg.id
+}
+
+# Ingress rule to allow SSH request
 resource "aws_security_group_rule" "sg_rule_appserver_ingress_22" {
   type                     = "ingress"
   from_port                = 22
@@ -104,25 +106,6 @@ resource "aws_security_group_rule" "sg_rule_appserver_ingress_22" {
   security_group_id        = aws_security_group.spotify_appserver_sg.id
 }
 
-resource "aws_security_group_rule" "sg_rule_appserver_ingress_3000" {
-  type                     = "ingress"
-  from_port                = 3000
-  to_port                  = 3000
-  protocol                 = "tcp"
-  description              = "Traffic on 3000 from ALB SG"
-  source_security_group_id = aws_security_group.spotify_alb_sg.id
-  security_group_id        = aws_security_group.spotify_appserver_sg.id
-}
-
-resource "aws_security_group_rule" "sg_rule_appserver_ingress_8000" {
-  type                     = "ingress"
-  from_port                = 8000
-  to_port                  = 8000
-  protocol                 = "tcp"
-  description              = "Traffic on 8000 from ALB SG"
-  source_security_group_id = aws_security_group.spotify_alb_sg.id
-  security_group_id        = aws_security_group.spotify_appserver_sg.id
-}
 
 resource "aws_security_group_rule" "sg_rule_appserver_egress" {
   type              = "egress"

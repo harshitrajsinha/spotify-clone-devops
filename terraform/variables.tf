@@ -102,19 +102,3 @@ variable "google_client_secret" {
   sensitive = true
   # NOTE: The default value is explicitly commented to apply failure and enforce passing value for variable through command line
 }
-
-variable "is_certificate_issued" {
-  description = "Boolean value on whether certificate is successfully issued and configured"
-  type        = bool
-  # default     = false  
-  # NOTE: The default value is explicitly commented to apply failure and enforce passing value for variable through command line
-
-}
-
-variable "cognito_external_provider" {
-  description = "Cognito external Oauth provider"
-  type        = string
-  # default     = "Google"  
-  # NOTE: The default value is explicitly commented to apply failure and enforce passing value for variable through command line
-
-}

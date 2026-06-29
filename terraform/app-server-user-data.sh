@@ -27,10 +27,35 @@ if [ ! -d "spotify-clone-devops" ]; then
 fi
 sudo chown -R ubuntu:ubuntu spotify-clone-devops
 
-# Install nodejs to run servers
-if ! command -v node >/dev/null 2>&1; then
-    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+##############################################################
+# Install docker
+if ! docker --version > /dev/null 2>&1; then
+    sudo apt remove $(dpkg --get-selections docker.io docker-compose docker-compose-v2 docker-doc podman-docker containerd runc | cut -f1)
+
+    # Add Docker's official GPG key:
+    sudo apt update
+    sudo apt install -y ca-certificates curl
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+    # Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<-EOF
+	Types: deb
+	URIs: https://download.docker.com/linux/ubuntu
+	Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+	Components: stable
+	Architectures: $(dpkg --print-architecture)
+	Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+    sudo apt update
+
+    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    # Add docker user group
+    sudo groupadd docker || true
+    sudo usermod -aG docker $USER
 fi
 
 ##############################################################
@@ -59,7 +84,7 @@ chmod 600 "$BACKEND_ENV_FILE"
 FRONTEND_ENV_FILE="${PROJECT_DIR}/frontend/.env"
 > "$FRONTEND_ENV_FILE"
 
-for name in VITE_BACKEND_URL VITE_COGNITO_DOMAIN VITE_COGNITO_CLIENT_ID VITE_MODE=; do
+for name in VITE_BACKEND_URL VITE_COGNITO_DOMAIN VITE_COGNITO_CLIENT_ID; do
     value=$(aws ssm get-parameter --name "/spotify/$name" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
     echo "${name}=${value}" >> "$FRONTEND_ENV_FILE"
 done
@@ -68,76 +93,9 @@ chown ubuntu:ubuntu "$FRONTEND_ENV_FILE"
 chmod 600 "$FRONTEND_ENV_FILE"
 ##############################################################
 
-# Run backend and frontend service in background through systemd
-cd "${PROJECT_DIR}/backend"
-sudo -u ubuntu npm install
-
-cd "${PROJECT_DIR}/frontend"
-sudo -u ubuntu npm install
+# Run reverse proxy, backend and frontend service in background through docker compose
+cd "${PROJECT_DIR}"
+sudo docker compose up -d --build
 
 
-# Create systemd service for backend
-NPM_PATH="$(command -v npm)"
- 
-sudo tee /etc/systemd/system/spotify-backend.service > /dev/null << EOF
-[Unit]
-Description=Spotify Clone Backend
-After=network-online.target
-Wants=network-online.target
- 
-[Service]
-Type=simple
-User=ubuntu
-WorkingDirectory=${PROJECT_DIR}/backend
-EnvironmentFile=${BACKEND_ENV_FILE}
-ExecStart=${NPM_PATH} start
-Restart=on-failure
-RestartSec=5
-StandardOutput=journal
-StandardError=journal
- 
-[Install]
-WantedBy=multi-user.target
-EOF
- 
-# Enable and start the backend service
-sudo systemctl daemon-reload
-sudo systemctl enable spotify-backend
-sudo systemctl start spotify-backend
-
-echo "Service started. Check status with: sudo systemctl status spotify-backend"
-echo "View logs with: sudo journalctl -u spotify-backend -f"
-
-
-# Create systemd service for frontend (change exec start in production)
-NPM_PATH="$(command -v npm)"
- 
-sudo tee /etc/systemd/system/spotify-frontend.service > /dev/null << EOF
-[Unit]
-Description=Spotify Clone Frontend
-After=network-online.target
-Wants=network-online.target
- 
-[Service]
-Type=simple
-User=ubuntu
-WorkingDirectory=${PROJECT_DIR}/frontend
-EnvironmentFile=${FRONTEND_ENV_FILE}
-ExecStart=${NPM_PATH} run dev
-Restart=on-failure
-RestartSec=5
-StandardOutput=journal
-StandardError=journal
- 
-[Install]
-WantedBy=multi-user.target
-EOF
- 
-# Enable and start the backend service
-sudo systemctl daemon-reload
-sudo systemctl enable spotify-frontend
-sudo systemctl start spotify-frontend
- 
-echo "Service started. Check status with: sudo systemctl status spotify-frontend"
-echo "View logs with: sudo journalctl -u spotify-frontend -f"
 ##############################################################
