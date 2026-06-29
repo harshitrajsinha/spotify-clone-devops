@@ -1,8 +1,8 @@
-This project is forked from [burakorkmez/realtime-spotify-clone](https://github.com/burakorkmez/realtime-spotify-clone) to learn and showcase **migration** of this application from <u>third-party services like Clerk, Cloudinary, MongoDB</u> to <u>AWS-native solutions like - AWS Cognito, S3, and DocumentDB</u>, along with containerizing the application and implementing CI/CD pipeline to continuously scan, build and deploy 👍
+This project is forked from [burakorkmez/realtime-spotify-clone](https://github.com/burakorkmez/realtime-spotify-clone) to learn and showcase my skills on containerization of application, implementation of CI/CD pipeline for automatic security scanning, testing, and building and finally deploying via docker compose. I have also performed **migration** of <u>third-party services used like Clerk, Cloudinary, MongoDB</u> to <u>AWS-native solutions - AWS Cognito, S3, and DocumentDB</u>👍
 
 <br>
 
-<img src="/assets/app-sample-run.png" alt="Demo App" width="800" height="400"/>
+<img src="./assets/app-sample-run.png" alt="Demo App" width="800" height="400"/>
 <h2 align="center">Realtime Spotify Application ✨</h2><br>
 
 ## 📋 <a name="table">Table of Contents</a>
@@ -17,7 +17,7 @@ This project is forked from [burakorkmez/realtime-spotify-clone](https://github.
 <p>3. AWS - Cognito (Auth), S3 (Object storage), DocumentDB (Database)</p>
 <p>4. Traefik as reverse proxy (if using Docker)
 
-## <a name="quick-start">Quick Start (via DOcker)</a>
+## <a name="quick-start">Quick Start (via Docker)</a>
 
 **Prerequisites**: Git, Docker
 
@@ -80,7 +80,7 @@ app/ $ npm run seed:songs
 app/ $ npm run seed:albums
 app/ $ exit
 ```
-NOTE: Data is loaded into database manually because adding into Dockerfile or Compose poses the risk of writing data into database everytime container runs or restart. This is problem in production, especially with large amount of data
+NOTE: Data is loaded into database manually because adding this script into Dockerfile or Compose poses the risk of writing data into database everytime container restarts. This is problem in production, especially with large amount of data
 
 
 ## AWS-native architecture
