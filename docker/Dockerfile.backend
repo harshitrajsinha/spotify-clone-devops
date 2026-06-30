@@ -12,6 +12,9 @@ RUN npm ci --omit=dev \
 # Copy files from local along with changing its ownership to non-root user
 COPY --chown=node:node ./backend/ .
 
+# Creating /tmp directory as it will be used as middleware to upload files to s3. Non-root user cannot create it at runtime
+RUN mkdir -p /app/tmp && chown -R node:node /app/tmp
+
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:8000/api/health ||  exit 1
