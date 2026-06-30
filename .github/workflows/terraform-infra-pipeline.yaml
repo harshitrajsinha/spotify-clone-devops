@@ -57,6 +57,10 @@ jobs:
       - name: get caller identity 1
         run: |
           aws sts get-caller-identity
+      
+      - name: Create directory to store tfplan files
+        run: mkdir -p plans
+        working-directory: terraform
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
@@ -81,7 +85,7 @@ jobs:
             -var="google_client_secret=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" \
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
             -input=false \
-            -out=ga/tfplan
+            -out=plans/tfplan
   
       - name: Terraform Apply
         if: github.event.inputs.terraform_action == 'apply'
@@ -91,7 +95,7 @@ jobs:
             -var="google_client_id=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" \
             -var="google_client_secret=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" \
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            -auto-approve ga/tfplan \
+            -auto-approve plans/tfplan \
             -input=false
 
       - name: Terraform Destroy
@@ -102,5 +106,5 @@ jobs:
             -var="google_client_id=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" \
             -var="google_client_secret=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" \
             -var="ssh_public_key=${{ secrets.SSH_PUBLIC_KEY }}" \
-            -auto-approve ga/tfplan \
+            -auto-approve plans/tfplan \
             -input=false
