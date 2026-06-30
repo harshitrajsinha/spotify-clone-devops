@@ -104,7 +104,14 @@ export const getTrendingSongs = async (req, res, next) => {
 			},
 		]);
 
-		res.json(songs);
+		const modifiedSongs = await Promise.all(
++            songs.map(async (song) => ({
++                ...song,
++                imageUrl: await getPresignedUrl(song.imageUrl),
++                audioUrl: await getPresignedUrl(song.audioUrl),
++            }))
++        );
++        res.json(modifiedSongs);
 	} catch (error) {
 		next(error);
 	}
