@@ -8,6 +8,10 @@ on:
       #   required: true
       #   default: dev
       #   type: string
+      my_ip_cidr:
+        description: "My IP CIDR allowed to SSH"
+        required: true
+        default: "0.0.0.0/32"
       terraform_action:
         description: 'Terraform Action'
         required: true
@@ -70,6 +74,7 @@ jobs:
         if: github.event.inputs.terraform_action == 'plan'
         run: |
           terraform plan \
+            -var="my_ip_cidr=${{ github.event.inputs.my_ip_cidr }}" \
             -var="google_client_id=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" \
             -var="google_client_secret=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" \
             -auto-approve \
@@ -79,6 +84,7 @@ jobs:
         if: github.event.inputs.terraform_action == 'apply'
         run: |
           terraform apply \
+            -var="my_ip_cidr=${{ github.event.inputs.my_ip_cidr }}" \
             -var="google_client_id=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" \
             -var="google_client_secret=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" \
             -auto-approve \
@@ -88,6 +94,7 @@ jobs:
         if: github.event.inputs.terraform_action == 'destroy'
         run: |
           terraform -chdir=eks destroy \
+            -var="my_ip_cidr=${{ github.event.inputs.my_ip_cidr }}" \
             -var="google_client_id=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" \
             -var="google_client_secret=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" \
             -auto-approve \

@@ -30,9 +30,10 @@ resource "aws_iam_instance_profile" "terraform_bastion_profile" {
 
 # ----------------------------------------------------------------------
 
-data "http" "my_ip" {
-  url = "https://checkip.amazonaws.com"
-}
+# This will not work in Github Actions
+# data "http" "my_ip" {
+#  url = "https://checkip.amazonaws.com"
+# }
 
 # Security group for bastion host
 
@@ -58,7 +59,7 @@ resource "aws_security_group" "bastion_host_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
+    cidr_blocks = [var.my_ip_cidr]
   }
 
 }

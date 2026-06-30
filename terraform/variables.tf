@@ -102,3 +102,7 @@ variable "google_client_secret" {
   sensitive = true
   # NOTE: The default value is explicitly commented to apply failure and enforce passing value for variable through command line
 }
+
+variable "my_ip_cidr" {
+  type = string
+}
