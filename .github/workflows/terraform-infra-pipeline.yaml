@@ -1,0 +1,94 @@
+name: 'Terraform Infrastructure Pipeline'
+
+on:
+  workflow_dispatch:
+    inputs:
+      # environment:   # For tfvars file based on environment
+      #   description: Terraform Environment
+      #   required: true
+      #   default: dev
+      #   type: string
+      terraform_action:
+        description: 'Terraform Action'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+  GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+
+permissions:
+  contents: read
+
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: get caller identity 1
+        run: |
+          aws sts get-caller-identity
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.15.7
+
+      - name: Terraform Init  # Initialize terrafrom
+        run: terraform init
+      
+      - name: Terraform Format # Format terraform code
+        run: terraform fmt -check -diff
+
+      - name: Terraform Validate # Validate terraform code
+        run: terraform validate
+
+      - name: Terraform Plan # terraform plan can be supplied with -var-file="${{ github.event.inputs.environment }}.tfvars"
+        if: github.event.inputs.terraform_action == 'plan'
+        run: |
+          terraform plan \
+            -var="google_client_id=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" \
+            -var="google_client_secret=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" \
+            -auto-approve \
+            -input=false
+  
+      - name: Terraform Apply
+        if: github.event.inputs.terraform_action == 'apply'
+        run: |
+          terraform apply \
+            -var="google_client_id=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" \
+            -var="google_client_secret=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" \
+            -auto-approve \
+            -input=false
+
+      - name: Terraform Destroy
+        if: github.event.inputs.terraform_action == 'destroy'
+        run: |
+          terraform -chdir=eks destroy \
+            -var="google_client_id=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" \
+            -var="google_client_secret=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" \
+            -auto-approve \
+            -input=false
