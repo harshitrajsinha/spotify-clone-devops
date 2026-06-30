@@ -105,13 +105,13 @@ export const getTrendingSongs = async (req, res, next) => {
 		]);
 
 		const modifiedSongs = await Promise.all(
-+            songs.map(async (song) => ({
-+                ...song,
-+                imageUrl: await getPresignedUrl(song.imageUrl),
-+                audioUrl: await getPresignedUrl(song.audioUrl),
-+            }))
-+        );
-+        res.json(modifiedSongs);
+            songs.map(async (song) => ({
+                ...song,
+                imageUrl: await getPresignedUrl(song.imageUrl),
+                audioUrl: await getPresignedUrl(song.audioUrl),
+            }))
+        );
+        res.json(modifiedSongs);
 	} catch (error) {
 		next(error);
 	}
