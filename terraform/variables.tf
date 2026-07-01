@@ -31,19 +31,19 @@ variable "vpc_cidr" {
 variable "private_subnet_cidr" {
   description = "List of CIDR blocks for private subnet"
   type        = list(string)
-  default     = ["10.5.1.0/24", "10.5.2.0/24"]
+  default     = ["10.5.1.0/24", "10.5.2.0/24", "10.5.3.0/24"]
 }
 
 variable "public_subnet_cidr" {
   description = "List of CIDR blocks for public subnet"
   type        = list(string)
-  default     = ["10.5.101.0/24", "10.5.102.0/24"]
+  default     = ["10.5.101.0/24", "10.5.102.0/24", "10.5.103.0/24"]
 }
 
 variable "intra_subnet_cidr" {
   description = "List of CIDR blocks for intra subnet"
   type        = list(string)
-  default     = ["10.5.11.0/24", "10.5.12.0/24"]
+  default     = ["10.5.11.0/24", "10.5.12.0/24", "10.5.13.0/24"]
 }
 
 variable "ubuntu_ami_id" {
@@ -86,6 +86,18 @@ variable "cognito_domain" {
   description = "Domain name for cognito"
   type        = string
   default     = "auth.harshitrajsinha.fun"
+}
+
+variable "s3_bucket_name_spotify" {
+  description = "S3 bucket name for spotify app"
+  type        = string
+  default     = "spotify-app-object-store"
+}
+
+variable "docdb_master_username" {
+  description = "Master username for docdb"
+  type        = string
+  sensitive   = true
 }
 
 #################################

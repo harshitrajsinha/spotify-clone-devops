@@ -59,6 +59,16 @@ EOF
 fi
 
 ##############################################################
+sudo mkdir -p /opt/certs
+
+# Download AWS DocumentDB / RDS global CA bundle
+sudo curl -fsSL \
+  https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
+  -o /opt/certs/global-bundle.pem
+
+sudo chmod 444 /opt/certs/global-bundle.pem
+
+##############################################################
 # Create .env file in backend and frontend by fetching values from AWS SSM parameter store
 AWS_REGION="us-east-1"
 PROJECT_DIR="/home/ubuntu/spotify-clone-devops" # IN user-data, $USER corresponds to root, hence hard-coding user name
@@ -73,7 +83,7 @@ fi
 BACKEND_ENV_FILE="${PROJECT_DIR}/backend/.env"
 > "$BACKEND_ENV_FILE" # Truncate or create file
 
-for name in PORT MONGODB_URI ADMIN_EMAIL NODE_ENV CLOUDINARY_API_KEY CLOUDINARY_API_SECRET CLOUDINARY_CLOUD_NAME FRONTEND_URL COGNITO_DOMAIN COGNITO_CLIENT_ID COGNITO_CLIENT_SECRET COGNITO_REDIRECT_URI COGNITO_USER_POOL_ID; do
+for name in PORT MONGODB_URI ADMIN_EMAIL NODE_ENV S3_BUCKET_NAME FRONTEND_URL COGNITO_DOMAIN COGNITO_CLIENT_ID COGNITO_CLIENT_SECRET COGNITO_REDIRECT_URI COGNITO_USER_POOL_ID; do
     value=$(aws ssm get-parameter --name "/spotify/$name" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
     echo "${name}=${value}" >> "$BACKEND_ENV_FILE"
 done

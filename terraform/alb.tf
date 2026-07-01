@@ -75,9 +75,19 @@ resource "aws_lb_listener" "spotify_appserver_alb_listener_80" {
   port              = 80
   protocol          = "HTTP"
 
+  # default_action {
+  #   type             = "forward"
+  #   target_group_arn = aws_lb_target_group.spotify_appserver_tg.arn
+  # }
+
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.spotify_appserver_tg.arn
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
   }
 }
 

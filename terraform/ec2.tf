@@ -16,6 +16,7 @@ resource "aws_iam_role" "ec2_role" {
 }
 
 #################################
+
 ### Create permission policy and attach to role - For SSM Parameter store
 data "aws_iam_policy_document" "permission_to_ssm_read" {
   statement {
@@ -29,7 +30,20 @@ resource "aws_iam_role_policy" "attach_perm_ssm_read" {
   policy = data.aws_iam_policy_document.permission_to_ssm_read.json
 }
 
-# Using Credentials for S3, Cognito, and DocumentDB rather than attaching permissions as latter would involve changing server code to update with AWS SDK
+### Create permission policy and attach to role - For S3 bucket
+data "aws_iam_policy_document" "permission_to_access_s3_bucket" {
+  statement {
+    actions   = ["s3:GetObject", "s3:PutObject"]
+    resources = ["${aws_s3_bucket.spotify_app_s3.arn}/*"]
+  }
+}
+resource "aws_iam_role_policy" "attach_perm_s3_bucket_access" {
+  name   = "appserver-s3-readwrite-perm"
+  role   = aws_iam_role.ec2_role.id
+  policy = data.aws_iam_policy_document.permission_to_access_s3_bucket.json
+}
+
+# Using Credentials for Cognito, and DocumentDB rather than attaching permissions as latter would involve changing server code to update with AWS SDK
 #################################
 
 # Create instance profile for appserver with role to read SSM parameters
@@ -68,12 +82,14 @@ resource "aws_instance" "spotify_app_server" {
     Environment = "${var.project_env_tag}"
   }
 
-   depends_on = [
-     module.vpc,
-     aws_ssm_parameter.cognito_clientid,
-     aws_ssm_parameter.cognito_clientsec,
-     aws_ssm_parameter.cognito_userpoolid,
-   ]
+  depends_on = [
+    module.vpc,
+    aws_ssm_parameter.cognito_clientid,
+    aws_ssm_parameter.cognito_clientsec,
+    aws_ssm_parameter.cognito_userpoolid,
+    aws_ssm_parameter.vite_cognito_clientid,
+    aws_ssm_parameter.docdb_connection_string
+  ]
 }
 
 output "app_server_private_ip" {

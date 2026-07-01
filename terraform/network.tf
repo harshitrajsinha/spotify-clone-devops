@@ -5,8 +5,8 @@ module "vpc" {
   cidr = var.vpc_cidr
 
   azs                     = var.infra_azs
-  private_subnets         = var.private_subnet_cidr # 2 private subnets for application server
-  public_subnets          = var.public_subnet_cidr  # 1 public subnet for NAT
+  private_subnets         = var.private_subnet_cidr # 3 private subnets for application server
+  public_subnets          = var.public_subnet_cidr  # 3 public subnet (1 for NAT)
   intra_subnets           = var.intra_subnet_cidr   # 3 intra subnets for document DB
   map_public_ip_on_launch = true                    # For bastion host, if provisioned
 
@@ -101,7 +101,7 @@ resource "aws_security_group_rule" "sg_rule_appserver_ingress_22" {
   from_port                = 22
   to_port                  = 22
   protocol                 = "tcp"
-  description              = "Traffic on 22 from Bastion SG"
+  description              = "Traffic on 22 from Bastion host"
   source_security_group_id = aws_security_group.bastion_host_sg.id
   security_group_id        = aws_security_group.spotify_appserver_sg.id
 }
@@ -115,4 +115,28 @@ resource "aws_security_group_rule" "sg_rule_appserver_egress" {
   description       = "Outbound to internet"
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.spotify_appserver_sg.id
+}
+
+
+### Security group for DocumentDB
+resource "aws_security_group" "spotify_docdb_sg" {
+  name        = "spotify-docdb-sg"
+  description = "Allow inbound traffic from appserver on port 27017"
+  vpc_id      = module.vpc.vpc_id
+
+  tags = {
+    Project     = "${var.project_name_tag}"
+    Terraform   = "true"
+    Environment = "${var.project_env_tag}"
+  }
+}
+
+resource "aws_security_group_rule" "sg_rule_docdb_ingress" {
+  type                     = "ingress"
+  from_port                = 27017
+  to_port                  = 27017
+  protocol                 = "tcp"
+  description              = "Inbound from app server"
+  security_group_id        = aws_security_group.spotify_docdb_sg.id
+  source_security_group_id = aws_security_group.spotify_appserver_sg.id
 }
