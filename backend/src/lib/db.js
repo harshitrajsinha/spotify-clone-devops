@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 export const connectDB = async () => {
 	try {
 		const conn = await mongoose.connect(process.env.MONGODB_URI, {
-        dbName: "spotify"
+        dbName: "spotify", tls: true, tlsCAFile: "/app/certs/global-bundle.pem", replicaSet: "rs0", readPreference: "secondaryPreferred", retryWrites: false, authMechanism: "SCRAM-SHA-1"
     });
 		console.log(`Connected to MongoDB ${conn.connection.host}`);
 	} catch (error) {
