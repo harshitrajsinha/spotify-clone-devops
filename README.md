@@ -94,13 +94,6 @@ VITE_COGNITO_CLIENT_ID=
 docker compose up --build
 ```
 
-**Loading data into database**
-```
-docker exec -it <backend-container-id> sh
-app/ $ npm run seed:songs
-app/ $ npm run seed:albums
-app/ $ exit
-```
 NOTE: Data is loaded into database manually because adding this script into Dockerfile or Compose poses the risk of writing data into database everytime container restarts. This is problem in production, especially with large amount of data
 
 # <a name="devops">Devopsifying the project</a>

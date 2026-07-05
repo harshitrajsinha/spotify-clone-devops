@@ -1,0 +1,66 @@
+[
+  {
+    "title": "Adventure",
+    "artist": "Various Artists",
+    "imageFileName": "adventure.webp",
+    "releaseYear": 2026,
+    "songs": [
+      {
+        "title": "Awaargi",
+        "artist": "Aditya A"
+      },
+      {
+        "title": "Chaap Tilak",
+        "artist": "Namita Choudhary"
+      }
+    ]
+  },
+  {
+    "title": "Hollywood Classics",
+    "artist": "Various Artists",
+    "imageFileName": "hollywood.jpg",
+    "releaseYear": 2026,
+    "songs": [
+      {
+        "title": "Despacito",
+        "artist": "Luis Fonsi"
+      },
+      {
+        "title": "Perfect",
+        "artist": "Ed Sheeran"
+      },
+      {
+        "title": "Happier",
+        "artist": "Marshmello"
+      },
+      {
+        "title": "1, 2, 3",
+        "artist": "Sofia Reyes"
+      },
+      {
+        "title": "Cruel Summer",
+        "artist": "Taylor Swift"
+      }
+    ]
+  },
+  {
+    "title": "Bollywood Masti",
+    "artist": "Various Artists",
+    "imageFileName": "bollywood.jpg",
+    "releaseYear": 2026,
+    "songs": [
+      {
+        "title": "Tere Bina",
+        "artist": "A.R. Rahman"
+      },
+      {
+        "title": "Chaap Tilak",
+        "artist": "Namita Choudhary"
+      },
+      {
+        "title": "Ilahi",
+        "artist": "Arjit Singh"
+      }
+    ]
+  }
+]

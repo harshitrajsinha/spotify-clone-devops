@@ -10,7 +10,7 @@ const getPresignedUrl = async (key) => {
             Bucket: process.env.S3_BUCKET_NAME,
             Key: key,
         }),
-        { expiresIn: 3600 }
+        { expiresIn: 300 }
     );
 };
 
@@ -24,7 +24,7 @@ export const getAllSongs = async (req, res, next) => {
                 audioUrl: await getPresignedUrl(song.audioUrl),
             }))
         );
-        res.json(modifiedSongs);
+        res.status(200).json(modifiedSongs);
     } catch (error) {
         next(error);
     }
@@ -51,7 +51,7 @@ export const getFeaturedSongs = async (req, res, next) => {
                 audioUrl: await getPresignedUrl(song.audioUrl),
             }))
         );
-        res.json(modifiedSongs);
+        res.status(200).json(modifiedSongs);
     } catch (error) {
         next(error);
     }
@@ -81,7 +81,7 @@ export const getMadeForYouSongs = async (req, res, next) => {
                 audioUrl: await getPresignedUrl(song.audioUrl),
             }))
         );
-        res.json(modifiedSongs);
+        res.status(200).json(modifiedSongs);
 	} catch (error) {
 		next(error);
 	}
@@ -111,7 +111,7 @@ export const getTrendingSongs = async (req, res, next) => {
                 audioUrl: await getPresignedUrl(song.audioUrl),
             }))
         );
-        res.json(modifiedSongs);
+        res.status(200).json(modifiedSongs);
 	} catch (error) {
 		next(error);
 	}

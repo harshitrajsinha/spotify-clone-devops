@@ -25,13 +25,7 @@ COGNITO_USER_POOL_ID=us-east-sampleid
 npm install
 ```
 
-3. Load songs and albums into Database (check backend/src/seed)
-```bash
-npm run seed:songs
-npm run seed:albums
-```
-
-4. Run in development mode
+3. Run in development mode
 ```bash
 npm run dev
 ```

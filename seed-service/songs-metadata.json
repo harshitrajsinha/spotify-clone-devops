@@ -1,16 +1,65 @@
 [
-  {
-		"title": "Neon Tokyo",
-		"artist": "Future Pulse",
-		"imageFileName": "17.jpg",
-		"audioFileName": "17.mp3",
-		"duration": 39
+  	{
+		"title": "Chaap Tilak",
+		"artist": "Namita Choudhary",
+		"imageFileName": "chaap-tilak.jpg",
+		"audioFileName": "Chaap Tilak - Namita Choudhary.m4a",
+		"duration": 195
 	},
 	{
-		"title": "Midnight Blues",
-		"artist": "Jazz Cats",
-		"imageFileName": "18.jpg",
-		"audioFileName": "18.mp3",
-		"duration": 29
+		"title": "Ilahi",
+		"artist": "Arjit Singh",
+		"imageFileName": "illahi.jpg",
+		"audioFileName": "Ilahi.m4a",
+		"duration": 230
+	},
+	{
+		"title": "Awaargi",
+		"artist": "Aditya A",
+		"imageFileName": "awaargi.jpg",
+		"audioFileName": "Awaargi.m4a",
+		"duration": 62
+	},
+	{
+		"title": "Despacito",
+		"artist": "Luis Fonsi",
+		"imageFileName": "despacito.jpg",
+		"audioFileName": "Despacito.m4a",
+		"duration": 229
+	},
+	{
+		"title": "Perfect",
+		"artist": "Ed Sheeran",
+		"imageFileName": "perfect.jpg",
+		"audioFileName": "Ed Sheeran - Perfect.m4a",
+		"duration": 264
+	},
+	{
+		"title": "Happier",
+		"artist": "Marshmello",
+		"imageFileName": "happier.jpg",
+		"audioFileName": "Marshmello-Happier.m4a",
+		"duration": 215
+	},
+	{
+		"title": "1, 2, 3",
+		"artist": "Sofia Reyes",
+		"imageFileName": "sofia-123.jpg",
+		"audioFileName": "Sofia Reyes - 1, 2, 3.m4a",
+		"duration": 202
+	},
+	{
+		"title": "Cruel Summer",
+		"artist": "Taylor Swift",
+		"imageFileName": "cruel-summer.jpg",
+		"audioFileName": "Taylor Swift - Cruel Summer.m4a",
+		"duration": 179
+	},
+	{
+		"title": "Tere Bina",
+		"artist": "A.R. Rahman",
+		"imageFileName": "tere-bina.jpg",
+		"audioFileName": "Tere Bina.m4a",
+		"duration": 300
 	}
 ]

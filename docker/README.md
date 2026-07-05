@@ -32,16 +32,7 @@ COGNITO_USER_POOL_ID=
 docker build -t harshitrajsinha/backend:v1 -f docker/Dockerfile.backend .
 ```
 
-3. Exec into backend container to load songs and albums
-```bash
-docker ps
-docker exec -it <backend-container-id> sh
-app/$ npm run seed:songs
-app/$ npm run seed:albums
-```
-
-
-4. Run docker run command from root directory of project
+3. Run docker run command from root directory of project
 ```bash
 docker run -p 8000:8000 --env-file ./backend/.env harshitrajsinha/backend:v1
 ```

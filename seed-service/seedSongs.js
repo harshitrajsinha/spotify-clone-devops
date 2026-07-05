@@ -1,12 +1,11 @@
-// seedSongs.js
-import fs from "fs";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import mongoose from "mongoose";
+
+
 import { Song } from "./song.model.js";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import s3Client from "./s3.js";
-import crypto  from "crypto";
+import uploadToS3 from "./s3.js";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -29,34 +28,6 @@ const MIME_TYPES = {
 
 const getMimeType = (ext) => MIME_TYPES[ext.toLowerCase()] || "application/octet-stream";
 
-const uploadToS3 = async (file, uploadKey) => {
-  try {
-
-    let key = ""
-    const ext = path.extname(file.name);
-    if (uploadKey === "audio"){
-      key = `songs/${crypto.randomUUID()}${ext}`;
-    }else if (uploadKey === "image") {
-      key = `thumbnail/${crypto.randomUUID()}${ext}`;
-    }
-
-    const result = await s3Client.send(
-      new PutObjectCommand({
-        Bucket: process.env.S3_BUCKET_NAME,
-        Key: key,
-        Body: fs.createReadStream(file.tempFilePath),
-        ContentType: file.mimetype
-      })
-    );
-
-    return key;
-
-  } catch (error) {
-    console.log("Error while uploading to S3", error);
-    throw new Error("Error uploading to S3");
-  }
-};
-
 const saveSong = async ({ title, artist, duration, audioFilePath, imageFilePath }) => {
   try{ 
 
@@ -68,7 +39,7 @@ const saveSong = async ({ title, artist, duration, audioFilePath, imageFilePath 
       tempFilePath: audioFilePath,
       mimetype: getMimeType(audioExt),
     };
-  
+
     const imageFile = {
       name: path.basename(imageFilePath),
       tempFilePath: imageFilePath,
@@ -85,22 +56,16 @@ const saveSong = async ({ title, artist, duration, audioFilePath, imageFilePath 
       audioUrl,
       imageUrl,
       duration,
-      // albumId: albumId || null,
     });
     
     await song.save();
 
-    // if song belongs to an album, update the album's songs array
-    // if (albumId) {
-    //   await Album.findByIdAndUpdate(albumId, {
-    //     $push: { songs: song._id },
-    //   });
-    // }
     return song;
+
   } catch (error) {
-		console.log("Error in saving song", error);
-    throw new Error("Error saving songs");
-	}
+    console.log("Error in saving song", error);
+    throw new Error("Error saving song");
+  }
 };
 
 
