@@ -1,0 +1,16 @@
+{
+  "name": "song-seeder",
+  "version": "1.0.0",
+  "description": "Seeds song metadata + files into MongoDB and S3",
+  "type": "module",
+  "main": "seedSongs.js",
+  "scripts": {
+    "seed": "node seedSongs.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.600.0",
+    "@aws-sdk/s3-request-presigner": "^3.600.0",
+    "dotenv": "^16.4.5",
+    "mongoose": "^8.4.0"
+  }
+}

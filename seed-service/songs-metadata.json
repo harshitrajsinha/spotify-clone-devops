@@ -2,15 +2,15 @@
   {
 		"title": "Neon Tokyo",
 		"artist": "Future Pulse",
-		"imageUrl": "/cover-images/17.jpg",
-		"audioUrl": "/songs/17.mp3",
+		"imageFileName": "17.jpg",
+		"audioFileName": "17.mp3",
 		"duration": 39
 	},
 	{
 		"title": "Midnight Blues",
 		"artist": "Jazz Cats",
-		"imageUrl": "/cover-images/18.jpg",
-		"audioUrl": "/songs/18.mp3",
+		"imageFileName": "18.jpg",
+		"audioFileName": "18.mp3",
 		"duration": 29
 	}
 ]
