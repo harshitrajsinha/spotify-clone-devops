@@ -3,7 +3,7 @@
 1. Setup .env in backend/ directory (refer .env.sample)
 ```env
 PORT=8000
-DOCUMENTDB_URI=mongodb+srv://username:password@cluster0.sampleurl.mongodb.net/spotify?appName=Cluster0
+MONGODB_URI=mongodb+srv://username:password@cluster0.sampleurl.mongodb.net/spotify?appName=Cluster0
 ADMIN_EMAIL=youremailid@emailprovider
 NODE_ENV=development
 

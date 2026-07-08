@@ -18,7 +18,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock # Docker sock binding (Not secure but require for service discovery). That's why exposedbydefault=false
     
   backend:
-    image: harshitrajsinha/spotify-backend:latest
+    # build:              # If running locally
+    #   context: .
+    #   dockerfile: docker/Dockerfile.backend
+    # image: backend-image:latest         # Pull from DockerHub
+    image: harshitrajsinha/spotify-backend:90332252c774ed2aebf15bb5945b1496d6b13e9f
     # Not to specify container_name and ports as they will create conflicts during scale up.
     expose:
       - "8000"
@@ -39,12 +43,13 @@ services:
       - "traefik.http.routers.backend.priority=10"
   
   frontend:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.frontend
-      secrets:
-        - spotify-frontend-env
-    image: frontend-image:latest
+    # build:              # If running locally
+    #   context: .
+    #   dockerfile: docker/Dockerfile.frontend
+    #   secrets:
+    #     - spotify-frontend-env
+    # image: frontend-image:latest
+    image: harshitrajsinha/spotify-frontend:79f1cb8be42e972f8ace60d59f86e650e70bdff2
     expose:
       - "80"
     networks:

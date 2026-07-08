@@ -9,7 +9,7 @@ Also, <u>frontend port is changed from 3000 to 80</u> as nginx is used to serve 
 1. Setup .env in backend/ directory (refer .env.sample)
 ```env
 PORT=8000
-DOCUMENTDB_URI=<using mongodb cloud>
+MONGODB_URI=<using mongodb cloud>
 ADMIN_EMAIL=
 NODE_ENV=development
 

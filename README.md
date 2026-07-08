@@ -3,26 +3,25 @@ This project is forked from [burakorkmez/realtime-spotify-clone](https://github.
 <br>
 
 <img src="./assets/project-system-architecture.png" alt="Demo App" width="800" height="400"/>
-<h2 align="center">Realtime Spotify Application ✨</h2><br>
 
 ```
-                              --------------
-                              |  Internet  |
-                              --------------   
-                                    |
-                                 AWS ALB
-                                    |
-                         Target Group (Port 80)
-                                    |
-                               EC2 Instance
-                    -----------------------------------
-                                    |
-                            Traefik (Port 80)
-                          ┌──────────┴──────────┐
-                          │                     │
-                    PathPrefix("/")     PathPrefix("/api")
-                          │                     │
-                       Frontend              Backend
+                                                --------------
+                                                |  Internet  |
+                                                --------------   
+                                                      |
+                                                   AWS ALB
+                                                      |
+                                           Target Group (Port 80)
+                                                      |
+                                                 EC2 Instance
+                                      -----------------------------------
+                                                      |
+                                              Traefik (Port 80)
+                                            ┌──────────┴──────────┐
+                                            │                     │
+                                      PathPrefix("/")     PathPrefix("/api")
+                                            │                     │
+                                         Frontend              Backend
 
 ```
 
@@ -55,7 +54,7 @@ cd spotify-clone-devops
 
 ```env
 PORT=8000
-DOCUMENTDB_URI=<mongodb cloud>
+MONGODB_URI=<mongodb cloud>
 ADMIN_EMAIL=
 NODE_ENV=development
 
@@ -111,6 +110,20 @@ The backend and frontend services have been successfully containerized using a m
 1. Secured frontend Docker image build-time environment variables using Build Secrets.<br/><br/>
 2. Improved the build time by combining copying and changing file ownership into single command (this could have significant impact depending on number of application files)
 <br/><br/>
+<hr>
+
+### 🔄 Continuous Integration
+
+A successful CI pipeline is built that runs when code changes are pushed for frontend and backend on dev (development) and main (production) branch. Depending on the environment development/production, different tasks are performed under the following jobs - 1. Security Scan, 2. Linting, 3. Test, 4. Image build and scan, 5. Release to DockerHub, 6. Commit new image tag to docker-compose file
+
+![ci-pipeline-image](./assets/ci-pipeline.png) 
+
+
+#### Learnings:
+1. How different tools are used to scan and secure the project, and choosing the right tool for development or production based on its impact on pipeline duration and performance.
+2. How to include a human approval step using the environment argument to ensure that the code being deployed to production is the expected version.
+
+<hr>
 
 ## AWS-native architecture
 ![Architecture](/assets/spotify-clone-devops-arc.png)

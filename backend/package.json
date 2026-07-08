@@ -32,9 +32,5 @@
 	},
 	"devDependencies": {
 		"nodemon": "^3.1.7"
-	},
-	"overrides": {
-		"sigstore": "4.1.1",
-		"undici": "6.27.0"
 	}
 }

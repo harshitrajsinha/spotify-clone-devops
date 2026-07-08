@@ -1,4 +1,4 @@
-name: CI pipeline - backend, to run security scan, test, create and push backend docker image
+name: CI pipeline - frontend, to run security scan, test, create and push frontend docker image
 
 on:
   push:
@@ -6,15 +6,15 @@ on:
       - main
       - dev
     paths:
-      - 'backend/**'
-      - 'docker/Dockerfile.backend'
+      - 'frontend/**'
+      - 'docker/Dockerfile.frontend'
       - '.github/workflows/**' # to be removed in production
 permissions:
   contents: read
 
 defaults:
   run:
-    working-directory: backend
+    working-directory: frontend
 
 jobs:
 
@@ -57,12 +57,12 @@ jobs:
           audit_level: high
           github_token: ${{ secrets.GITHUB_TOKEN }}
           issue_assignees: harshitrajsinha
-          issue_labels: vulnerability,backend
-          working_directory: backend
+          issue_labels: vulnerability,frontend
+          working_directory: frontend
       - name: Display audit report
         run: npm audit --audit-level=high || true
       
-      ## File system scan (backend service):
+      ## File system scan (frontend service):
       
       - name: Scan file system
         if: github.ref == 'refs/heads/main'
@@ -70,12 +70,12 @@ jobs:
         with:
           scan-type: 'fs'
           scanners: vuln,secret,misconfig
-          scan-ref: ./backend
+          scan-ref: ./frontend
           format: table
           exit-code: 1
           severity: HIGH,CRITICAL
 
-      ### SBOM generation for backend:
+      ### SBOM generation:
       # Note -> Here we are generating dependency graph directly to GitHub insights rather than separate artifact
       - name: SBOM generation
         if: github.ref == 'refs/heads/main'
@@ -84,7 +84,7 @@ jobs:
           scan-type: 'fs'
           format: 'github'
           output: 'dependency-results.sbom.json'
-          scan-ref: ./backend
+          scan-ref: ./frontend
           skip-setup-trivy: true
           github-pat: ${{ secrets.GITHUB_TOKEN }}
   
@@ -116,7 +116,7 @@ jobs:
         env:
           DEFAULT_BRANCH: 'main'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILTER_REGEX_INCLUDE: '^backend/.*'
+          FILTER_REGEX_INCLUDE: '^frontend/.*'
         continue-on-error: true
 
   # unit-tests:
@@ -131,7 +131,7 @@ jobs:
       contents: read
     
     env:
-      IMAGE_NAME: harshitrajsinha/spotify-backend
+      IMAGE_NAME: harshitrajsinha/spotify-frontend
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
@@ -146,7 +146,8 @@ jobs:
         with:
           node-version: '24'
       
-      # - Add build step for frontend
+      - name: Build app
+        run: npm run build
       
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -162,12 +163,12 @@ jobs:
         uses: docker/build-push-action@v7.2.0
         with:
           context: .
-          file: docker/Dockerfile.backend
+          file: docker/Dockerfile.frontend
           push: false
           load: true
           tags: ${{env.IMAGE_NAME}}:${{env.IMAGE_TAG}}
       
-      ## Scan docker image using docker scout (for dev branch)
+      ## Scan docker image using docker scout
       - name: Docker Scout
         if: github.ref == 'refs/heads/dev'
         uses: docker/scout-action@v1.21.0
@@ -187,7 +188,7 @@ jobs:
           name: docker-scout-report
           path: sarif.output.json
 
-      ## Scan docker image using trivy (for main branch)
+      ## Scan docker image using trivy
       - name: Docker image scan using Trivy
         if: github.ref == 'refs/heads/main'
         uses: aquasecurity/trivy-action@v0.36.0
@@ -214,7 +215,6 @@ jobs:
           name: trivy-sbom-docker-image-report
           path: 'docker-image.sbom.json'
       
-      # Push the image onto DockerHub registry
       - name: Push image to docker registry
         run: docker push $IMAGE_NAME:$IMAGE_TAG
 
@@ -230,7 +230,7 @@ jobs:
       contents: write
     
     env:
-      IMAGE_NAME: harshitrajsinha/spotify-backend
+      IMAGE_NAME: harshitrajsinha/spotify-frontend
       IMAGE_TAG: ${{ github.sha }}
 
     steps:

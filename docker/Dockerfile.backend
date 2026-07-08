@@ -1,4 +1,4 @@
-FROM node:24.16.0-alpine3.23
+FROM node:24.18.0-alpine3.23
 
 WORKDIR /app
 
@@ -14,6 +14,8 @@ COPY --chown=node:node ./backend/ .
 
 # Creating /tmp directory as it will be used as middleware to upload files to s3. Non-root user cannot create it at runtime
 RUN mkdir -p /app/tmp && chown -R node:node /app/tmp
+
+RUN rm -rf /usr/local/lib/node_modules/npm
 
 EXPOSE 8000
 
