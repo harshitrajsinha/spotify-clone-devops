@@ -1,0 +1,248 @@
+name: CI pipeline - backend, to run security scan, test, create and push backend docker image
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'backend/**'
+      - '.github/workflows/**' # to be removed in production
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+
+  security-scan:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: '24'
+      
+      ### Secrets scan
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_NOTIFY_USER_LIST: '@harshitrajsinha'
+
+      ### Dependency scan:
+
+      - name: Dependency scan
+        # if: github.ref == 'refs/heads/dev'
+        uses: oke-py/npm-audit-action@v4.0.2
+        with:
+          audit_level: high
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          issue_assignees: harshitrajsinha
+          issue_labels: vulnerability,backend
+          working_directory: backend
+      - name: Display audit report
+        run: npm audit --audit-level=high || true
+      
+      ## File system scan:
+      
+      - name: Scan file system
+        if: github.ref == 'refs/heads/main'
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'fs'
+          scanners: vuln,secret,misconfig
+          scan-ref: '.'
+          format: table
+          exit-code: 1
+          severity: HIGH,CRITICAL
+
+      ### SBOM generation:
+      # Note -> Here we are generating dependency graph directly to GitHub insights rather than separate artifact
+      - name: SBOM generation
+        if: github.ref == 'refs/heads/main'
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: 'fs'
+          format: 'github'
+          output: 'dependency-results.sbom.json'
+          scan-ref: '.'
+          skip-setup-trivy: true
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
+  
+  linting:
+
+    needs: [security-scan]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: '24'
+          
+      - name: Super-Linter
+        uses: super-linter/super-linter@v8.6.0
+        with:
+          DEFAULT_BRANCH: 'dev'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # unit-tests:
+    # needs: [security-scan, linting]
+
+  image-build-release:
+    # needs: [security-scan, linting, unit-tests]
+    needs: [security-scan]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+    
+    env:
+      IMAGE_NAME: harshitrajsinha/spotify-backend
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6.0.2
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: '24'
+      
+      # - Add build step for frontend
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Docker Login
+        uses: docker/login-action@v4.2.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      ## Build docker image (only)
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v7.2.0
+        with:
+          context: .
+          file: docker/Dockerfile.backend
+          push: false
+          load: true
+          tags: ${{env.IMAGE_NAME}}:${{env.IMAGE_TAG}}
+      
+      ## Scan docker image using docker scout (for dev branch)
+      - name: Docker Scout
+        if: github.ref == 'refs/heads/dev'
+        uses: docker/scout-action@v1.21.0
+        with:
+          command: cves
+          image: ${{env.IMAGE_NAME}}:${{env.IMAGE_TAG}}
+          ignore-unchanged: true
+          only-severities: critical,high
+          write-comment: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sarif-file: sarif.output.json
+          summary: true
+      - name: Upload docker scout result Artifact
+        if: always() && github.ref == 'refs/heads/dev'
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: docker-scout-report
+          path: sarif.output.json
+
+      ## Scan docker image using trivy (for main branch)
+      - name: Docker image scan using Trivy
+        if: github.ref == 'refs/heads/main'
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
+
+      # SBOM generation
+      # Note -> Here we are generating separate artifact for SBOM rather than for GitHub insights
+      - name: Generate SBOM for docker image
+        if: github.ref == 'refs/heads/main'
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          format: 'cyclonedx'
+          output: 'docker-image.sbom.json'
+          skip-setup-trivy: true
+      - name: Upload trivy report as a Github artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-sbom-docker-image-report
+          path: 'docker-image.sbom.json'
+      
+      # Push the image onto DockerHub registry
+      - name: Push image to docker registry
+        run: docker push $IMAGE_NAME:$IMAGE_TAG
+
+  update-and-commit-compose:
+
+    needs: [image-build-release]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+    
+    env:
+      IMAGE_NAME: harshitrajsinha/spotify-backend
+      IMAGE_TAG: ${{ github.sha }}
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v6.0.2
+      
+      - name: Update docker-compose image tag
+        run: |
+          sed -i "s|image: $IMAGE_NAME:.*|image: $IMAGE_NAME:$IMAGE_TAG|" docker-compose.yaml
+      
+      - name: Commit updated compose file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add docker-compose.yaml
+          git commit -m "Update backend image to $IMAGE_TAG" || echo "No changes"
+
+          git push
