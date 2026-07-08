@@ -18,10 +18,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock # Docker sock binding (Not secure but require for service discovery). That's why exposedbydefault=false
     
   backend:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.backend
-    image: backend-image:latest
+    image: harshitrajsinha/spotify-backend:latest
     # Not to specify container_name and ports as they will create conflicts during scale up.
     expose:
       - "8000"
