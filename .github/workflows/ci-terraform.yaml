@@ -10,7 +10,8 @@ on:
       - '.github/workflows/**' # to be removed in production
 permissions:
   contents: read
-  security-events: write  # Required to upload SARIF files to Security tab
+  security-events: read # Required to Trivy to read
+  security-events: write  # Required to Trivy upload SARIF files to Security tab
 
 defaults:
   run:
