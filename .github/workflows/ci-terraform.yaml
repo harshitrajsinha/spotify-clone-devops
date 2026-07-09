@@ -1,0 +1,77 @@
+name: CI pipeline - terraform, to run security scan, formatting and validation of terraform resource code
+
+on:
+  push:
+    branches:
+      # - main
+      - dev
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/**' # to be removed in production
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: terraform
+
+jobs:
+
+  terraform:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      # Secret Scan
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_NOTIFY_USER_LIST: '@harshitrajsinha'
+        continue-on-error: true
+
+      # Install Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      # Format Check
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+
+      # Init (backend disabled)
+      - name: Terraform Init
+        run: terraform init -backend=false -input=false
+
+      # Syntax Validation
+      - name: Terraform Validate
+        run: terraform validate
+        continue-on-error: true
+
+      # TF Lint
+      - uses: terraform-linters/setup-tflint@v6
+        name: Setup TFLint
+        with:
+          cache: true
+
+      - name: Init TFLint
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Run TFLint
+        run: tflint -f compact
+        continue-on-error: true
+
+
