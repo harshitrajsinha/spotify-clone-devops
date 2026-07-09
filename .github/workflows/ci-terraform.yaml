@@ -79,6 +79,7 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'config'
+          scan-ref: ./terraform
           hide-progress: true
           format: 'sarif'
           output: 'trivy-results-terraform.sarif'
