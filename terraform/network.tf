@@ -9,7 +9,7 @@ module "vpc" {
   private_subnets         = var.private_subnet_cidr # 2 private subnets for application server
   public_subnets          = var.public_subnet_cidr  # 1 public subnet for NAT
   intra_subnets           = var.intra_subnet_cidr   # 3 intra subnets for document DB
-  map_public_ip_on_launch = false                    # For bastion host, if provisioned
+  map_public_ip_on_launch = false                   # For bastion host, if provisioned
 
   enable_nat_gateway = true
   single_nat_gateway = true
