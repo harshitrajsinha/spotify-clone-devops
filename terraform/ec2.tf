@@ -68,6 +68,15 @@ resource "aws_instance" "spotify_app_server" {
     Environment = var.project_env_tag
   }
 
+  root_block_device {
+    encrypted = true
+  }
+
+  ebs_block_device {
+    device_name = "/dev/sdg"
+    encrypted   = true
+  }
+
   depends_on = [
     module.vpc,
     aws_ssm_parameter.cognito_clientid,
