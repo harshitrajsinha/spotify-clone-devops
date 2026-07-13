@@ -24,6 +24,8 @@ resource "aws_iam_role" "bastion_iam_role" {
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 }
 
+### IMP NOTE: There is a limit to 10 policies per role, and an instance profile can only have one role attached to it.
+
 # Attach AWS-managed VPC policy
 resource "aws_iam_role_policy_attachment" "vpc_access" {
   role       = aws_iam_role.bastion_iam_role.name
@@ -60,16 +62,54 @@ resource "aws_iam_role_policy_attachment" "docdb_access" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonDocDBFullAccess"
 }
 
-# Attach AWS-managed SSM Parameter store policy
-resource "aws_iam_role_policy_attachment" "ssm_access" {
-  role       = aws_iam_role.bastion_iam_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+# Attach AWS-managed SSM Parameter store policy and secrets manager policy
+resource "aws_iam_policy" "ssm_kms_secm_policy" {
+  name        = "ssm-kms-secm-policy"
+  description = "SSM, KMS and Secrets Manager permissions for bastion instance"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "SSM"
+        Effect = "Allow"
+        Action = [
+          "ssm:*",
+          "ssmmessages:*",
+          "ec2messages:*"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "SecretsManager"
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:*"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "KMS"
+        Effect = "Allow"
+        Action = [
+          "kms:DescribeKey",
+          "kms:CreateGrant",
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:ListAliases",
+          "kms:ListKeys"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
 }
 
-# Attach AWS-managed secret manager policy
-resource "aws_iam_role_policy_attachment" "secret_manager_access" {
+resource "aws_iam_role_policy_attachment" "bastion_custom" {
   role       = aws_iam_role.bastion_iam_role.name
-  policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+  policy_arn = aws_iam_policy.ssm_kms_secm_policy.arn
 }
 
 # Attach AWS-managed ACM policy
@@ -89,8 +129,6 @@ resource "aws_iam_role_policy_attachment" "ssm" {
   role       = aws_iam_role.bastion_iam_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
-
-######### Some additional permissions
 
 resource "aws_iam_policy" "additional_permissions" {
   name        = "additional-permissions-policy"
@@ -158,6 +196,8 @@ resource "aws_iam_role_policy_attachment" "addition_perm_access" {
   policy_arn = aws_iam_policy.additional_permissions.arn
 }
 
+########################################
+
 # Instance Profile
 resource "aws_iam_instance_profile" "terraform_bastion_profile" {
   name = "terraform-bastion-profile"
@@ -208,4 +248,8 @@ resource "aws_instance" "spotify_bastion" {
 
 output "bastion_public_ip" {
   value = aws_instance.spotify_bastion.public_ip
+}
+
+output "bastion_instance_id" {
+  value = aws_instance.spotify_bastion.id
 }

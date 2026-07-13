@@ -1,7 +1,7 @@
 name: CI pipeline - backend, to run security scan, test, create and push backend docker image
 
 on:
-  push:
+  push: # must be changed to "pull_request" in production
     branches:
       - main
       - dev

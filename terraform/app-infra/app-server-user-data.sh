@@ -30,9 +30,8 @@ sudo chown -R ubuntu:ubuntu spotify-clone-devops
 ##############################################################
 # Install node
 
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.5/install.sh | bash
-\. "/home/ubuntu/.nvm/nvm.sh"
-nvm install 24
+curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
+apt-get install -y nodejs
 
 ##############################################################
 # Install docker

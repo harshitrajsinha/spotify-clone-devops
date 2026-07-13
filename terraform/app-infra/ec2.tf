@@ -15,6 +15,12 @@ resource "aws_iam_role" "ec2_role" {
   assume_role_policy = data.aws_iam_policy_document.policy_for_ec2_assume.json
 }
 
+// Attach EC2 SSM agent IAM role for access
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 #################################
 
 ### Create permission policy and attach to role - For SSM Parameter store
@@ -55,17 +61,6 @@ resource "aws_iam_instance_profile" "appserver_instance_profile" {
 
 # ---------------------------------------------------------------------------------
 
-# NOTE: It is more secure to avoid creating key-pair and access via AWS SSM
-# Key pair to access app server in private subnet
-resource "aws_key_pair" "spotify_appserver_key" {
-  key_name   = "appserver-key"
-  public_key = var.appserver_public_key
-  tags = {
-    Project   = var.project_name_tag
-    Terraform = "true"
-  }
-}
-
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -82,12 +77,12 @@ data "aws_ami" "ubuntu" {
   }
 }
 
+# Will connect using SSM agent
 resource "aws_instance" "spotify_app_server" {
   ami                         = var.project_env == "production" ? data.aws_ami.ubuntu.id : var.custom_dev_ubuntu_ami_id
   instance_type               = var.appserver_instance_type
   associate_public_ip_address = false
   iam_instance_profile        = aws_iam_instance_profile.appserver_instance_profile.name
-  key_name                    = aws_key_pair.spotify_appserver_key.key_name
   subnet_id                   = element(module.vpc.private_subnets, 0)
   user_data_base64            = var.project_env == "production" ? base64encode(file("./app-server-user-data.sh")) : base64encode(file("./devapp-server-user-data.sh"))
   vpc_security_group_ids      = [aws_security_group.spotify_appserver_sg.id]
@@ -117,4 +112,8 @@ resource "aws_instance" "spotify_app_server" {
 
 output "app_server_private_ip" {
   value = aws_instance.spotify_app_server.private_ip
+}
+
+output "app_server_instance_id" {
+  value = aws_instance.spotify_app_server.id
 }

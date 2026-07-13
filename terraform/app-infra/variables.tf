@@ -67,12 +67,6 @@ variable "appserver_instance_type" {
   default     = "t3a.medium"
 }
 
-variable "bastion_instance_type" {
-  description = "Bastion server instance type"
-  type        = string
-  default     = "t3a.micro"
-}
-
 variable "ssm_parameter_store_generic_arn" {
   description = "ARN with wildcard that includes all the parameters store on SSM parameter store"
   type        = string
@@ -101,11 +95,6 @@ variable "s3_bucket_name_spotify" {
   description = "S3 bucket name for spotify app"
   type        = string
   default     = "spotify-app-object-store"
-}
-
-variable "appserver_public_key" {
-  description = "SSH public key for the app server"
-  type        = string
 }
 
 variable "docdb_master_username" {

@@ -1,10 +1,3 @@
-# data "aws_security_group" "bastion_host_sg" {
-#   filter {
-#     name   = "group-name"
-#     values = [var.bastion_host_sg_name]
-#   }
-# }
-
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "6.6.1"

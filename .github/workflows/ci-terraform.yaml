@@ -1,7 +1,7 @@
 name: CI pipeline - terraform, to run security scan, formatting and validation of terraform resource code
 
 on:
-  push:
+  push: # must be changed to "pull_request" in production
     branches:
       - main
     paths:

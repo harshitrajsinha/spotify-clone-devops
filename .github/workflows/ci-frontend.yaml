@@ -1,7 +1,7 @@
 name: CI pipeline - frontend, to run security scan, test, create and push frontend docker image
 
 on:
-  push:
+  push: # must be changed to "pull_request" in production
     branches:
       - main
       - dev

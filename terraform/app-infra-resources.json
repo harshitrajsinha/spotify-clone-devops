@@ -12,7 +12,8 @@
     "aws_iam_instance_profile.appserver_instance_profile",
     "aws_iam_role.ec2_role",
     "aws_iam_role_policy.attach_perm_s3_bucket_access",
-    "aws_iam_role_policy.attach_perm_ssm_read"
+    "aws_iam_role_policy.attach_perm_ssm_read",
+    "aws_iam_role_policy_attachment.ssm"
   ],
   "Secrets Manager": [
     "data.aws_secretsmanager_secret_version.docdb_password"
@@ -27,14 +28,12 @@
     "aws_docdb_cluster.spotify_docdb",
     "aws_docdb_cluster_instance.spotify_docdb_reader",
     "aws_docdb_cluster_instance.spotify_docdb_writer",
-    "aws_docdb_subnet_group.spotify_docdb_subnet_grp",
-    "data.aws_secretsmanager_secret_version.docdb_password"
+    "aws_docdb_subnet_group.spotify_docdb_subnet_grp"
   ],
   "EC2": [
-    "aws_instance.spotify_app_server",
-    "aws_key_pair.spotify_appserver_key"
+    "aws_instance.spotify_app_server"
   ],
-  "Elastic Load Balancing (ALB)": [
+  "Elastic Load Balancing": [
     "aws_lb.spotify_appserver_alb",
     "aws_lb_listener.spotify_appserver_alb_listener_443",
     "aws_lb_listener.spotify_appserver_alb_listener_80",
@@ -49,7 +48,7 @@
     "aws_s3_bucket_server_side_encryption_configuration.spotify_app_s3_bucket_encrypt",
     "aws_s3_bucket_versioning.spotify_app_s3_bucket_versioning"
   ],
-  "Security Groups": [
+  "EC2 Security Groups": [
     "aws_security_group.spotify_alb_sg",
     "aws_security_group.spotify_appserver_sg",
     "aws_security_group.spotify_docdb_sg",
@@ -61,7 +60,7 @@
     "aws_security_group_rule.sg_rule_appserver_ingress_80",
     "aws_security_group_rule.sg_rule_docdb_ingress_appserver"
   ],
-  "SSM Parameter Store": [
+  "Systems Manager (SSM)": [
     "aws_ssm_parameter.cognito_clientid",
     "aws_ssm_parameter.cognito_clientsec",
     "aws_ssm_parameter.cognito_userpoolid",
@@ -69,23 +68,20 @@
     "aws_ssm_parameter.s3_bucket_spotify",
     "aws_ssm_parameter.vite_cognito_clientid"
   ],
-  "VPC Endpoints": [
+  "VPC": [
     "aws_vpc_endpoint.ec2",
     "aws_vpc_endpoint.elasticloadbalancing",
     "aws_vpc_endpoint.kms",
     "aws_vpc_endpoint.s3",
     "aws_vpc_endpoint.secretsmanager",
     "aws_vpc_endpoint.ssm",
-    "aws_vpc_endpoint.sts"
-  ],
-  "VPC": [
-    "module.vpc.aws_vpc.this[0]",
-    "module.vpc.aws_internet_gateway.this[0]",
-    "module.vpc.aws_nat_gateway.this[0]",
-    "module.vpc.aws_eip.nat[0]",
+    "aws_vpc_endpoint.sts",
     "module.vpc.aws_default_network_acl.this[0]",
     "module.vpc.aws_default_route_table.default[0]",
     "module.vpc.aws_default_security_group.this[0]",
+    "module.vpc.aws_eip.nat[0]",
+    "module.vpc.aws_internet_gateway.this[0]",
+    "module.vpc.aws_nat_gateway.this[0]",
     "module.vpc.aws_route.private_nat_gateway[0]",
     "module.vpc.aws_route.public_internet_gateway[0]",
     "module.vpc.aws_route_table.intra[0]",
@@ -108,6 +104,7 @@
     "module.vpc.aws_subnet.private[2]",
     "module.vpc.aws_subnet.public[0]",
     "module.vpc.aws_subnet.public[1]",
-    "module.vpc.aws_subnet.public[2]"
+    "module.vpc.aws_subnet.public[2]",
+    "module.vpc.aws_vpc.this[0]"
   ]
 }
