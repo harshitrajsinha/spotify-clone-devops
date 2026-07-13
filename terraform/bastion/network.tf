@@ -50,11 +50,7 @@ resource "aws_route_table_association" "public_rt_assn" {
   subnet_id      = aws_subnet.public_subnet_spotify_project_bastion.id
 }
 
-data "http" "my_ip" {
-  url = "https://checkip.amazonaws.com"
-}
-
-# Security group for bastion host
+# Security group for bastion host - will connect using ssm agent
 resource "aws_security_group" "bastion_host_sg" {
   name        = "spotify-sg-bastion"
   description = "Security group for bastion host"
@@ -71,14 +67,6 @@ resource "aws_security_group" "bastion_host_sg" {
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "Allow SSH traffic only from local"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }
 
 }

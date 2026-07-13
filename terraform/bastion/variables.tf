@@ -39,8 +39,3 @@ variable "bucket_name" {
   type        = string
   default     = "spotify-project-remote-storage"
 }
-
-variable "bastion_public_key" {
-  description = "SSH public key for the bastion host"
-  type        = string
-}

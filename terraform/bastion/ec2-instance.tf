@@ -84,6 +84,12 @@ resource "aws_iam_role_policy_attachment" "cognito_access" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonCognitoPowerUser"
 }
 
+# Attach EC2 SSM agent IAM role for access
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.bastion_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 ######### Some additional permissions
 
 resource "aws_iam_policy" "additional_permissions" {
@@ -160,17 +166,6 @@ resource "aws_iam_instance_profile" "terraform_bastion_profile" {
 
 # ----------------------------------------------------------------------
 
-# Key to connect to bastion host (for SSH)
-resource "aws_key_pair" "spotify_bastion_key" {
-  key_name   = "bastion-key"
-  public_key = var.bastion_public_key
-  tags = {
-    Project   = var.project_tag
-    Terraform = "true"
-  }
-}
-
-
 data "aws_ami" "ubuntu" {
   most_recent = true
 
@@ -187,13 +182,12 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# Create bastion host (EC2)
+# Create bastion host (EC2) - will connect using SSM agent
 resource "aws_instance" "spotify_bastion" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.bastion_instance_type
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.terraform_bastion_profile.name
-  key_name                    = aws_key_pair.spotify_bastion_key.key_name
   subnet_id                   = aws_subnet.public_subnet_spotify_project_bastion.id
   user_data_base64            = base64encode(file("./bastion-user-data.sh"))
   vpc_security_group_ids      = [aws_security_group.bastion_host_sg.id]
