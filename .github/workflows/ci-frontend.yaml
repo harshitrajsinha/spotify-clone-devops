@@ -129,6 +129,7 @@ jobs:
 
     permissions:
       contents: read
+      id-token: write
     
     env:
       IMAGE_NAME: harshitrajsinha/groovify-frontend
@@ -157,12 +158,26 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          
+
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6.2.2
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: arn:aws:iam::211125424910:role/github-action-ssm-param-read
+      
+      - name: Read Parameter
+        id: ssm
+        run: |
+          ENV_VITE_COGNITO_CLIENT_ID=$(aws ssm get-parameter \
+            --name "/groovify/VITE_COGNITO_CLIENT_ID" \
+            --with-decryption \
+            --query "Parameter.Value" \
+            --output text)
+      
+          echo "::add-mask::$ENV_VITE_COGNITO_CLIENT_ID"
+          echo "client_id=$ENV_VITE_COGNITO_CLIENT_ID" >> "$GITHUB_OUTPUT"
 
       ## Build docker image (only)
       - name: Build and push Docker images
@@ -171,10 +186,10 @@ jobs:
           context: .
           file: docker/Dockerfile.frontend
           secrets: |
-            "VITE_BACKEND_URL=${{ secrets.GITHUB_TOKEN }}"
-            "VITE_MODE=${{ secrets.GITHUB_TOKEN }}"
-            "VITE_COGNITO_DOMAIN=${{ secrets.GITHUB_TOKEN }}"
-            "VITE_COGNITO_CLIENT_ID=${{ secrets.GITHUB_TOKEN }}"
+            "VITE_BACKEND_URL=${{ secrets.ENV_VITE_BACKEND_URL }}"
+            "VITE_MODE=${{ vars.ENV_VITE_MODE }}"
+            "VITE_COGNITO_DOMAIN=${{ secrets.ENV_VITE_COGNITO_DOMAIN }}"
+            "VITE_COGNITO_CLIENT_ID=${{ steps.ssm.outputs.client_id }}"
           push: false
           load: true
           tags: ${{env.IMAGE_NAME}}:${{env.IMAGE_TAG}}

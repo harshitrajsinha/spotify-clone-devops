@@ -1,6 +1,6 @@
 # Build stage
 
-FROM node:24.16.0-alpine3.23 AS builder
+FROM node:24.18.0-alpine3.24 AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ RUN --mount=type=secret,id=groovify-frontend-env,target=/app/.env \
 
 # Final stage
 
-FROM nginx:stable-alpine3.23
+FROM nginx:stable-alpine3.24
 
 RUN apk add --no-cache curl
 

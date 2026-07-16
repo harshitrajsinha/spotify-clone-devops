@@ -43,13 +43,13 @@ services:
       - "traefik.http.routers.backend.priority=10"
   
   frontend:
-    # build:              # If running locally
-    #   context: .
-    #   dockerfile: docker/Dockerfile.frontend
-    #   secrets:
-    #     - groovify-frontend-env
-    # image: frontend-image:latest
-    image: harshitrajsinha/groovify-frontend:79f1cb8be42e972f8ace60d59f86e650e70bdff2
+    build:              # If running locally
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+      secrets:
+        - groovify-frontend-env
+    image: groovify-frontend:local
+    # image: harshitrajsinha/groovify-frontend:ef7c7b823a80295582c64066843969ab95e71db8
     expose:
       - "80"
     networks:
