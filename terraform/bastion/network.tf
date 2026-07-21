@@ -5,6 +5,7 @@ resource "aws_vpc" "vpc_groovify_project_bastion" {
   enable_dns_support   = true
   instance_tenancy     = "default"
   tags = {
+    Name = "${var.project_tag}-vpc"
     Project   = var.project_tag
     Terraform = "true"
   }
@@ -14,6 +15,7 @@ resource "aws_vpc" "vpc_groovify_project_bastion" {
 resource "aws_internet_gateway" "igw_groovify_project_bastion" {
   vpc_id = aws_vpc.vpc_groovify_project_bastion.id
   tags = {
+    Name = "${var.project_tag}-igw"
     Project   = var.project_tag
     Terraform = "true"
   }
@@ -26,6 +28,7 @@ resource "aws_subnet" "public_subnet_groovify_project_bastion" {
   cidr_block              = var.public_subnet_cidr
   map_public_ip_on_launch = true
   tags = {
+    Name = "${var.project_tag}-pub-sub"
     Project   = var.project_tag
     Terraform = "true"
   }
@@ -39,6 +42,7 @@ resource "aws_route_table" "public_rt_groovify_project_bastion" {
     gateway_id = aws_internet_gateway.igw_groovify_project_bastion.id
   }
   tags = {
+    Name = "${var.project_tag}-pub-rt"
     Project   = var.project_tag
     Terraform = "true"
   }
@@ -57,6 +61,7 @@ resource "aws_security_group" "bastion_host_sg" {
   vpc_id      = aws_vpc.vpc_groovify_project_bastion.id
 
   tags = {
+    Name = "${var.project_tag}-sg"
     Project   = var.project_tag
     Terraform = "true"
   }

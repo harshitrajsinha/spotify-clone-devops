@@ -126,7 +126,7 @@ resource "aws_security_group_rule" "sg_rule_docdb_ingress_appserver" {
   to_port                  = 27017
   protocol                 = "tcp"
   description              = "Inbound from app server"
-  security_group_id        = aws_security_group.groovifyy_docdb_sg.id
+  security_group_id        = aws_security_group.groovify_docdb_sg.id
   source_security_group_id = aws_security_group.groovify_appserver_sg.id
 }
 

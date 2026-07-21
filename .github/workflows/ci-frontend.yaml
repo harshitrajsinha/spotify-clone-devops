@@ -158,6 +158,14 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Create frontend .env
+        run: |
+          cat > frontend.env <<EOF
+          VITE_BACKEND_URL=${{ secrets.ENV_VITE_BACKEND_URL }}
+          VITE_MODE=${{ vars.ENV_VITE_MODE }}
+          VITE_COGNITO_DOMAIN=${{ secrets.ENV_VITE_COGNITO_DOMAIN }}
+          EOF
 
       ## Build docker image (only)
       - name: Build and push Docker images
@@ -166,9 +174,7 @@ jobs:
           context: .
           file: docker/Dockerfile.frontend
           secrets: |
-            "VITE_BACKEND_URL=${{ secrets.ENV_VITE_BACKEND_URL }}"
-            "VITE_MODE=${{ vars.ENV_VITE_MODE }}"
-            "VITE_COGNITO_DOMAIN=${{ secrets.ENV_VITE_COGNITO_DOMAIN }}"
+            id=groovify-frontend-env,src=frontend.env
           push: false
           load: true
           tags: ${{env.IMAGE_NAME}}:${{env.IMAGE_TAG}}

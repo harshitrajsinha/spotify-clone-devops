@@ -3,6 +3,7 @@ resource "aws_s3_bucket" "app_infra_remote_storage" {
   bucket        = var.bucket_name
   force_destroy = true
   tags = {
+    Name = "${var.project_tag}-s3-bucket"
     Project   = var.project_tag
     Terraform = "true"
   }
