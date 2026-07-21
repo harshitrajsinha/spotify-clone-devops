@@ -1,0 +1,3 @@
+window.__CONFIG__ = {
+  VITE_COGNITO_CLIENT_ID: "__VITE_COGNITO_CLIENT_ID__"
+};

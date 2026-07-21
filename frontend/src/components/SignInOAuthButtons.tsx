@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 const SignInOAuthButtons = () => {
   const signInWithGoogle = () => {
     const domain = import.meta.env.VITE_COGNITO_DOMAIN;
-    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+    const clientId = window.__CONFIG__.VITE_COGNITO_CLIENT_ID;
     const redirectUri = encodeURIComponent(
       `${window.location.origin}/auth-callback`
     );

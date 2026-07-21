@@ -29,11 +29,16 @@ services:
     env_file:
       - backend/.env
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
     volumes:
       - /opt/certs/global-bundle.pem:/app/certs/global-bundle.pem:ro
     ############################   CPU and memory limit required
     deploy:
-      replicas: 1 # Pre-allocate replicas based on capability of t3a.medium because auto-scaling is not possible in docker
+      replicas: 3 # Pre-allocate replicas based on capability of t3a.medium because auto-scaling is not possible in docker
     networks:
       - traefik-net
     labels:
@@ -41,6 +46,7 @@ services:
       - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
       - "traefik.http.routers.backend.priority=10"
+      - "com.docker.compose.service=backend"
   
   frontend:
     build:              # If running locally
@@ -55,6 +61,13 @@ services:
     networks:
       - traefik-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ./frontend/config.js:/usr/share/nginx/html/config.js:ro
     deploy:
       replicas: 1
     labels:
@@ -62,6 +75,7 @@ services:
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.priority=1"
+      - "com.docker.compose.service=frontend"
     depends_on:
       - backend
 

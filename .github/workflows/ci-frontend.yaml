@@ -51,7 +51,7 @@ jobs:
       ### Dependency scan:
 
       - name: Dependency scan
-        # if: github.ref == 'refs/heads/dev'
+        if: github.ref == 'refs/heads/test'
         uses: oke-py/npm-audit-action@v4.0.2
         with:
           audit_level: high
@@ -65,7 +65,7 @@ jobs:
       ## File system scan (frontend service):
       
       - name: Scan file system
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/test'
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'fs'
@@ -78,7 +78,7 @@ jobs:
       ### SBOM generation:
       # Note -> Here we are generating dependency graph directly to GitHub insights rather than separate artifact
       - name: SBOM generation
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/test'
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'fs'
@@ -159,26 +159,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v6.2.2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
-          role-to-assume: arn:aws:iam::211125424910:role/github-action-ssm-param-read
-      
-      - name: Read Parameter
-        id: ssm
-        run: |
-          ENV_VITE_COGNITO_CLIENT_ID=$(aws ssm get-parameter \
-            --name "/groovify/VITE_COGNITO_CLIENT_ID" \
-            --with-decryption \
-            --query "Parameter.Value" \
-            --output text)
-      
-          echo "::add-mask::$ENV_VITE_COGNITO_CLIENT_ID"
-          echo "client_id=$ENV_VITE_COGNITO_CLIENT_ID" >> "$GITHUB_OUTPUT"
-
       ## Build docker image (only)
       - name: Build and push Docker images
         uses: docker/build-push-action@v7.2.0
@@ -189,7 +169,6 @@ jobs:
             "VITE_BACKEND_URL=${{ secrets.ENV_VITE_BACKEND_URL }}"
             "VITE_MODE=${{ vars.ENV_VITE_MODE }}"
             "VITE_COGNITO_DOMAIN=${{ secrets.ENV_VITE_COGNITO_DOMAIN }}"
-            "VITE_COGNITO_CLIENT_ID=${{ steps.ssm.outputs.client_id }}"
           push: false
           load: true
           tags: ${{env.IMAGE_NAME}}:${{env.IMAGE_TAG}}
@@ -216,7 +195,7 @@ jobs:
 
       ## Scan docker image using trivy
       - name: Docker image scan using Trivy
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/test'
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
@@ -228,7 +207,7 @@ jobs:
       # SBOM generation
       # Note -> Here we are generating separate artifact for SBOM rather than for GitHub insights
       - name: Generate SBOM for docker image
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/test'
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
