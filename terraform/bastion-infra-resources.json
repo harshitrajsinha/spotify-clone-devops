@@ -5,20 +5,13 @@
   "IAM": [
     "data.aws_iam_policy_document.ec2_assume_role",
     "aws_iam_instance_profile.terraform_bastion_profile",
-    "aws_iam_policy.additional_permissions",
-    "aws_iam_policy.ssm_kms_secm_policy",
+    "aws_iam_policy.bastion_aws_managed_equivalent",
+    "aws_iam_policy.bastion_custom_policy",
     "aws_iam_role.bastion_iam_role",
-    "aws_iam_role_policy_attachment.acm_access",
-    "aws_iam_role_policy_attachment.addition_perm_access",
-    "aws_iam_role_policy_attachment.bastion_custom",
+    "aws_iam_role_policy_attachment.bastion_aws_managed_equivalent",
+    "aws_iam_role_policy_attachment.bastion_custom_policy",
     "aws_iam_role_policy_attachment.cognito_access",
-    "aws_iam_role_policy_attachment.docdb_access",
-    "aws_iam_role_policy_attachment.ec2_access",
-    "aws_iam_role_policy_attachment.elb_access",
-    "aws_iam_role_policy_attachment.iam_access",
-    "aws_iam_role_policy_attachment.s3_access",
-    "aws_iam_role_policy_attachment.ssm",
-    "aws_iam_role_policy_attachment.vpc_access"
+    "aws_iam_role_policy_attachment.ssm"
   ],
   "EC2": [
     "aws_instance.groovify_bastion"
